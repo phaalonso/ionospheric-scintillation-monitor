@@ -1,4 +1,4 @@
-import { IPrnIndicesController } from "../../controller/IPrnIndicesController";
+import { IPrnIndicesController } from "../../controller";
 import logger from "../../logger";
 import { SQLite } from "../database/DAO";
 
@@ -8,7 +8,7 @@ export class PrnIndicesBetterSqlite implements IPrnIndicesController {
 	) { }
 
 	public async createTable() {
-		logger.log('Criando prnindices');
+		logger.info('Criando prnindices');
 		const sql = `
 			CREATE TABLE IF NOT EXISTS prnindices (
 				id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +57,7 @@ export class PrnIndicesBetterSqlite implements IPrnIndicesController {
 
 		const res = stmt.run(lastDateTime.toISOString());
 
-		logger.log(`Removed ${res.changes} rows from PrnIndices`);
+		logger.info(`Removed ${res.changes} rows from PrnIndices`);
     }
 
 }

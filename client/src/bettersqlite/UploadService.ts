@@ -34,13 +34,13 @@ export class UploadService {
 		});
 
 		this.client.on('error', (err) => {
-			logger.exception(err, 'BackupService (FTP)');
+			logger.error(err, 'BackupService (FTP)');
 		});
 	}
 
 	public async connect() {
 		return new Promise((resolve) => {
-			logger.log('Connecting to upload service');
+			logger.info('Connecting to upload service');
 			this.client.connect({
 				host: this.config.host,
 				password: this.config.password,
@@ -51,7 +51,7 @@ export class UploadService {
 
 			this.client.on('ready', () => {
 				this.ready = true;
-				logger.log('Backup service (FTP) is ready!');
+				logger.info('Backup service (FTP) is ready!');
 
 				// this.client.list(this.config.backupPath, (err, list) => {
 				// 	if (err) {
@@ -61,7 +61,7 @@ export class UploadService {
 				// 				console.log('AAAAAAa')
 				// 				if (err) return reject(err);
 
-				// 				logger.log('Creating directory');
+				// 				logger.info('Creating directory');
 
 				// 				resolve(undefined);
 				// 			});

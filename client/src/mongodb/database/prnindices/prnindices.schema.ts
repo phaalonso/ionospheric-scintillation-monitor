@@ -1,40 +1,38 @@
-import { Schema } from "mongoose";
-
-const { Number, Date } = Schema.Types;
+import { Schema } from "mongoose"
 
 const PrnIndicesSchema = new Schema({
-    prn: {
-        type: Number,
-        required: true,
-    },
-    mediasnr: {
-        type: Number,
-        required: true,
-    },
-    mediaazi: {
-        type: Number,
-        required: true,
-    },
-    mediaelev: {
-        type: Number,
-        required: true,
-    },
-    minTime: {
-        type: Date,
-        required: true,
-    },
-    maxTime: {
-        type: Date,
-        required: true,
-    },
-    dpsnr: {
-        type: Number,
-        required: true,
-    },
-    s4: {
-        type: Number,
-        required: true,
-    },
+	prn: {
+		type: Schema.Types.Number,
+		required: true,
+	},
+	mediasnr: {
+		type: Schema.Types.Number,
+		required: true,
+	},
+	mediaazi: {
+		type: Schema.Types.Number,
+		required: true,
+	},
+	mediaelev: {
+		type: Schema.Types.Number,
+		required: true,
+	},
+	minTime: {
+		type: Schema.Types.Date,
+		required: true,
+	},
+	maxTime: {
+		type: Schema.Types.Date,
+		required: true,
+	},
+	dpsnr: {
+		type: Schema.Types.Number,
+		required: true,
+	},
+	s4: {
+		type: Schema.Types.Number,
+		required: true,
+	}
 });
 
 export default PrnIndicesSchema;

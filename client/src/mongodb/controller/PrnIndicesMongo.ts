@@ -8,7 +8,7 @@ export class PrnIndicesMongo implements IPrnIndicesController {
         dpSnr: number,
         s4: number,
         time: Date,
-        prn: number,
+        prn: number
     ) {
         const minTime = new Date(time.getTime() - 60000);
 
@@ -45,21 +45,19 @@ export class PrnIndicesMongo implements IPrnIndicesController {
             s4,
         };
 
-        return (
-            new PrnIndicesModel(data)
-                .save()
-                // .then(() => console.log('Saved prnindice'))
-                .catch((err) => {
-                    logger.exception(err, "On insert prnindices Mongo");
-                })
-        );
+        return new PrnIndicesModel(data)
+            .save()
+            // .then(() => console.log('Saved prnindice'))
+            .catch((err) => {
+                logger.error(err, 'On insert prnindices Mongo');
+            });
     }
 
     indicesLength(): Promise<number> {
         return new Promise((res, rej) => {
             PrnIndicesModel.countDocuments()
                 .then((count) => res(count))
-                .catch((err) => rej(err));
+                .catch(err => rej(err));
         });
     }
 

@@ -25,7 +25,7 @@ export class ProcessData {
     ) {
         const processConfig = config.get('process');
 
-        logger.log('Iniciando ProcessData');
+        logger.info('Iniciando ProcessData');
 
         this.interval = processConfig.interval;
         this.logInterval = processConfig.logInterval;
@@ -34,8 +34,8 @@ export class ProcessData {
         this.counter = 0;
         this.maxCounter = 60000 / this.interval;
 
-        logger.log(`Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`);
-        logger.log(`Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`);
+        logger.info(`Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`);
+        logger.info(`Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`);
 
         this.setupProcess(this.interval);
     }
@@ -44,22 +44,22 @@ export class ProcessData {
         const prninfoLength = await this.prnInfoController.countRows();
         const prnindicesLength = await this.prnIndicesController.indicesLength();
 
-        // logger.log(`Quantidade de  dados ${qtd}`);
-        logger.log(`prninfo rowCount: ${prninfoLength}`);
-        logger.log(`prnindices rowCount: ${prnindicesLength}`);
+        // logger.info(`Quantidade de  dados ${qtd}`);
+        logger.info(`prninfo rowCount: ${prninfoLength}`);
+        logger.info(`prnindices rowCount: ${prnindicesLength}`);
     }
 
     private setupProcess(interval: number): NodeJS.Timeout {
         const processInterval = async () => {
             if (this.buffer.length == 0) {
-                logger.log('Buffer vazio');
+                logger.info('Buffer vazio');
                 return;
             }
 
             const clone = [...this.buffer];
 
             await this.prnInfoController.insertMany(clone);
-            logger.log(`Prninfo: inserted ${clone.length} data`);
+            logger.info(`Prninfo: inserted ${clone.length} data`);
             this.buffer = [];
             this.counter++;
 
@@ -106,7 +106,7 @@ export class ProcessData {
         }
 
         if (this.oneMinuteSinceLastProcess(time, this.timeController)) {
-            logger.log(`${time} storing prn indices\n`);
+            logger.info(`${time} storing prn indices\n`);
             this.timeController = time;
             await this.processMinute();
         }
@@ -118,15 +118,15 @@ export class ProcessData {
 
     public async processMinute() {
         try {
-            logger.log(`storing prn indices for ${this.timeController.toISOString()}!`)
+            logger.info(`storing prn indices for ${this.timeController.toISOString()}!`)
 
             const prnResultSize = await this.prnInfoController.groupByPrn(this.timeController);
 
-            logger.log(`processing ${prnResultSize.length} lines`);
+            logger.info(`processing ${prnResultSize.length} lines`);
 
             for (const prnRow of prnResultSize) {
                 if (prnRow.total < MIN_QTDE) {
-                    logger.log(`prn ${prnRow.prn} has less than ${MIN_QTDE} samples at ${this.timeController.toISOString()}!`);
+                    logger.info(`prn ${prnRow.prn} has less than ${MIN_QTDE} samples at ${this.timeController.toISOString()}!`);
                     continue;
                 }
 
@@ -147,7 +147,7 @@ export class ProcessData {
                     }
 
                     if (vectorRawSnr.length == 0) {
-                        logger.log("vSnr vazio");
+                        logger.info("vSnr vazio");
                         continue;
                     }
 
@@ -158,7 +158,7 @@ export class ProcessData {
                         Math.max(0, s4Total ** 2 - s4Noise ** 2)
                     );
 
-                    logger.log(`Inserting prnindice`);
+                    logger.info(`Inserting prnindice`);
                     await this.prnIndicesController.insertProcessedData(
                         dpSnr,
                         s4,
@@ -167,11 +167,11 @@ export class ProcessData {
                     );
                 } catch (err: any) {
                     console.log(err);
-                    logger.exception(err);
+                    logger.error(err);
                 }
             }
         } catch (err: any) {
-            logger.exception(err);
+            logger.error(err);
             process.exit(1);
         }
     }

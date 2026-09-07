@@ -1,29 +1,29 @@
-import net from "net";
-import readline from "readline";
+import net from 'node:net';
+import readline from 'node:readline';
 
 const client = new net.Socket();
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+	input: process.stdin,
+	output: process.stdout,
 });
 
-client.connect(4000, "127.0.0.1", () => {
-    console.log("Conectou");
+client.connect(4000, '127.0.0.1', () => {
+	console.log('Conectou');
 
-    rl.addListener("line", (line) => {
-        client.write(line);
-    });
+	rl.addListener('line', line => {
+		client.write(line);
+	});
 
-    client.on("data", (data) => {
-        process.stdout.write(data.toString());
-    });
+	client.on('data', data => {
+		process.stdout.write(data.toString());
+	});
 
-    setTimeout(() => {
-        console.log("Timeout");
-        client.write("end");
-        client.end(() => {
-            console.log("ended");
-            client.unref();
-        });
-    }, 1000 * 5);
+	setTimeout(() => {
+		console.log('Timeout');
+		client.write('end');
+		client.end(() => {
+			console.log('ended');
+			client.unref();
+		})
+	}, 1000 * 5);
 });

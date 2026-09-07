@@ -20,7 +20,7 @@ async function initDatabase() {
     const selectedDB = process.env.DB;
 
     if (!selectedDB) {
-        logger.log("can't find the DB variable");
+        logger.info("can't find the DB variable");
         process.exit(1);
     }
 
@@ -43,7 +43,7 @@ async function initDatabase() {
             break;
         }
         default:
-            logger.log("Unknown DB env variable, use sqlite or mongo");
+            logger.info("Unknown DB env variable, use sqlite or mongo");
             process.exit(1);
     }
 }
@@ -83,7 +83,7 @@ async function start() {
         client.subscribe("custom");
         await client.start();
     } catch (err: any) {
-        logger.exception(err);
+        logger.error(err);
     }
 }
 

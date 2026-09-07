@@ -19,8 +19,8 @@ function logQtd() {
         aumentar: () => {
             quantidade = quantidade + 1;
         },
-        getQtd: () => quantidade,
-    };
+        getQtd: () => quantidade
+    }
 }
 
 async function start() {
@@ -32,7 +32,7 @@ async function start() {
 
         const qtd = logQtd();
 
-        socketPubSub.createChannel("custom");
+        socketPubSub.createChannel('custom');
         //webSocketPubSub.createChannel('custom');
 
         let time = new Date();
@@ -41,15 +41,11 @@ async function start() {
 
         // Inicia o log do contador, tempo em ms
         // 1000 * 60 * 5 - 5 minutos
-        setInterval(
-            (qtd) => {
-                logger.log(`Quantidade de dados enviadas: ${qtd.getQtd()}`);
-            },
-            config.log.qtdEnvioInterval,
-            qtd,
-        );
+        setInterval((qtd) => {
+            logger.info(`Quantidade de dados enviadas: ${qtd.getQtd()}`);
+        }, config.log.qtdEnvioInterval, qtd);
 
-        gpsReceiver.serialInput("/dev/ttyUSB0");
+        gpsReceiver.serialInput('/dev/ttyUSB0');
         gpsReceiver.parse();
 
         gpsReceiver.on("data", async (data) => {
@@ -59,30 +55,24 @@ async function start() {
                 lon = data.lon;
             }
 
-            if (
-                !data.msgNumber ||
-                data.msgNumber == "null" ||
-                !data.satellites ||
-                !lat ||
-                !lon
-            ) {
+            if (!data.msgNumber || data.msgNumber == "null" || !data.satellites || !lat || !lon) {
                 return;
             } else {
                 for (const satelite of data.satellites) {
                     const message = `sat_${satelite.prn}_${satelite.snr}_${satelite.azimuth}_${satelite.elevation}_${lat}_${lon}_${time.getTime()}\n`;
-                    socketPubSub.pub("custom", message);
-                    //-					webSocketPubSub.pub('custom', message);
+                    socketPubSub.pub('custom', message);
+//-					webSocketPubSub.pub('custom', message);
                     qtd.aumentar();
                 }
             }
         });
 
-        gpsReceiver.on("error", (err: Error) => {
-            logger.log("Erro no GnssDataStream");
-            logger.log(err);
+        gpsReceiver.on('error', (err: Error) => {
+            logger.info('Erro no GnssDataStream');
+            logger.error(err);
         });
     } catch (err) {
-        logger.exception(err instanceof Error ? err : String(err));
+        logger.error(err instanceof Error ? err : String(err));
         process.exit(1);
     }
 }

@@ -9,7 +9,7 @@ export class PrnInfoBetterSqlite implements IPrnInfoController {
 	) { }
 
 	async createTable() {
-		logger.log('Criando prninfo');
+		logger.info('Criando prninfo');
 		const sql = `
 			CREATE TABLE IF NOT EXISTS prninfo (
 				id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -86,6 +86,6 @@ export class PrnInfoBetterSqlite implements IPrnInfoController {
 
 		const res = stmt.run(lastDateTime.toISOString());
 
-		logger.log(`Removed ${res.changes} rows from PrnInfo`);
+		logger.info(`Removed ${res.changes} rows from PrnInfo`);
     }
 }

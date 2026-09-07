@@ -18,7 +18,7 @@ export abstract class PubSub<T> {
      */
     public createChannel(channelName: string) {
         this.listeningChannels.set(channelName, new Set<CustomSocket<T>>());
-        logger.log(`Creating channel with name ${channelName}`);
+        logger.info(`Creating channel with name ${channelName}`);
     }
 
     /**
@@ -32,7 +32,7 @@ export abstract class PubSub<T> {
         if (!channel || channel.has(socket)) return;
 
         channel.add(socket);
-        logger.log(`Subscribe in ${channelName}`);
+        logger.info(`Subscribe in ${channelName}`);
         socket.channels = socket.channels || [];
         socket.channels.push(channelName);
     }
@@ -84,7 +84,7 @@ export abstract class PubSub<T> {
         const msgArray = data.toString().split("\n");
 
         for (const msg of msgArray) {
-            logger.log(`Received message: ${msg}`);
+            logger.info(`Received message: ${msg}`);
 
             const matchSub = msg.match(/^sub_(.*)$/);
 
@@ -106,7 +106,7 @@ export abstract class PubSub<T> {
                 return;
             }
 
-            logger.exception(new Error(`Comando desconhecido ${msg}`));
+            logger.error(new Error(`Comando desconhecido ${msg}`));
         }
     }
 }
