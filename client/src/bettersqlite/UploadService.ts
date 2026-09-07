@@ -1,7 +1,6 @@
 import Client from 'ftp';
 import logger from '../logger';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
 
 interface UploadConfig {
 	host: string;
@@ -17,11 +16,11 @@ export interface FileInfo {
 }
 
 export class UploadService {
-	private client: Client;
+	private readonly client: Client;
 	private ready: boolean;
 
 	constructor(
-		private config: UploadConfig,
+		private readonly config: UploadConfig,
 	) {
 		this.client = new Client();
 		this.ready = false;

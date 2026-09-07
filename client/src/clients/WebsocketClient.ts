@@ -6,7 +6,7 @@ export class WebsocketClient extends Client {
     private client!: WebSocket;
 
     constructor(
-        private websocketUrl: string,
+        private readonly websocketUrl: string,
     ) {
         super();
     }

@@ -21,7 +21,7 @@ export abstract class PubSub<T> {
     }
 
     /**
-     * @description Subscribe a socket in determined channel
+     * @description Subscribe a socket in a determined channel
      * @param channelName
      * @param socket
      */
@@ -88,16 +88,16 @@ export abstract class PubSub<T> {
 
             const matchSub = msg.match(/^sub_(.*)$/);
 
-            if (matchSub && matchSub[1]) {
+            if (matchSub?.[1]) {
                 const channel = matchSub[1];
                 this.sub(channel, socket);
 				this.sendMessage(socket, `rec_${msg}`);
                 return;
             }
 
-            const matchPub = msg.match(/^pub_(.*)_(.*)$/);
+            const matchPub = (/^pub_(.*)_(.*)$/).exec(msg);
 
-            if (matchPub && matchPub[1] && matchPub[2]) {
+            if (matchPub?.[1] && matchPub[2]) {
                 const channel = matchPub[1];
                 const message = matchPub[2];
 
