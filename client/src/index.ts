@@ -10,6 +10,8 @@ import { PrnIndicesMongo } from "./mongodb/controller/PrnIndicesMongo";
 import { PrnInfoMongo } from "./mongodb/controller/PrnInfoMongo";
 import { connect } from "./mongodb/database/connection";
 import { ProcessData } from "./ProcessData";
+import { setInterval } from "node:timers";
+import config from "./config/ConfigProvider";
 
 let prnInfoController: IPrnInfoController;
 let prnIndicesController: IPrnIndicesController;
@@ -48,6 +50,7 @@ async function initDatabase() {
 
 async function start() {
     try {
+        const processConfig = config.get("process");
         const file = path.join(__dirname, "..", "..", `sqlite.log`);
         console.log(file);
         logger.enableWrite(file);
@@ -58,6 +61,10 @@ async function start() {
             prnInfoController,
             prnIndicesController,
         );
+
+        setInterval(() => {
+            processData.logDBSize();
+        }, processConfig.logInterval);
 
         // const client = new WebSocketClient(processData);
 

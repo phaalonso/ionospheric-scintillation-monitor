@@ -52,7 +52,7 @@ export abstract class PubSub<T> {
     }
 
     /**
-     * @description Publish a message in determined channel
+     * @description Publish a message in a determined channel
      * @param channelName
      * @param message
      */

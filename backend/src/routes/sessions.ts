@@ -17,11 +17,9 @@ sessions.post("/", async (req, res) => {
         const valid = await UserService.login({ email, password });
 
         if (!valid) {
-            return res
-                .status(400)
-                .json({
-                    message: "Can't find an user with this email and password",
-                });
+            return res.status(400).json({
+                message: "Can't find an user with this email and password",
+            });
         }
 
         const data: DecodedJWTContent = {

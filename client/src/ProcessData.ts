@@ -21,11 +21,11 @@ export class ProcessData {
 
     constructor(
         private readonly prnInfoController: IPrnInfoController,
-        private readonly prnIndicesController: IPrnIndicesController,
+        private readonly prnIndicesController: IPrnIndicesController
     ) {
-        const processConfig = config.get("process");
+        const processConfig = config.get('process');
 
-        logger.log("Iniciando ProcessData");
+        logger.log('Iniciando ProcessData');
 
         this.interval = processConfig.interval;
         this.logInterval = processConfig.logInterval;
@@ -34,38 +34,25 @@ export class ProcessData {
         this.counter = 0;
         this.maxCounter = 60000 / this.interval;
 
-        logger.log(
-            `Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`,
-        );
-        logger.log(
-            `Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`,
-        );
+        logger.log(`Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`);
+        logger.log(`Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`);
 
-        this.setupDBSizeLog(this.logInterval);
         this.setupProcess(this.interval);
     }
 
-    /**
-     * @param interval interval in ms to log the database size
-     */
-    private setupDBSizeLog(interval: number): NodeJS.Timeout {
-        const logDbSize = async () => {
-            const prninfoLength = await this.prnInfoController.countRows();
-            const prnindicesLength =
-                await this.prnIndicesController.indicesLength();
+    public async logDBSize() {
+        const prninfoLength = await this.prnInfoController.countRows();
+        const prnindicesLength = await this.prnIndicesController.indicesLength();
 
-            // logger.log(`Quantidade de  dados ${qtd}`);
-            logger.log(`Prninfo: ${prninfoLength}`);
-            logger.log(`Prnindices: ${prnindicesLength}`);
-        };
-
-        return setInterval(logDbSize, interval);
+        // logger.log(`Quantidade de  dados ${qtd}`);
+        logger.log(`prninfo rowCount: ${prninfoLength}`);
+        logger.log(`prnindices rowCount: ${prnindicesLength}`);
     }
 
     private setupProcess(interval: number): NodeJS.Timeout {
         const processInterval = async () => {
             if (this.buffer.length == 0) {
-                logger.log("Buffer vazio");
+                logger.log('Buffer vazio');
                 return;
             }
 
@@ -81,12 +68,15 @@ export class ProcessData {
                 this.counter = 0;
                 this.processMinute();
 
-                const timestamp = this.timeController.getTime();
+                const timestamp = this.timeController.getTime()
                 this.timeController = new Date(timestamp + 60000);
             }
-        };
+        }
 
-        return setInterval(processInterval, interval);
+        return setInterval(
+            processInterval,
+            interval
+        );
     }
 
     /**
@@ -97,7 +87,7 @@ export class ProcessData {
         satellite: Satellite[],
         lat: number,
         lon: number,
-        time: Date,
+        time: Date
     ) {
         if (!this.timeController) {
             this.timeController = time;
@@ -115,90 +105,69 @@ export class ProcessData {
             });
         }
 
-        if (this.passouUmMinuto(time)) {
-            logger.log(`${time} Salvando prnindices\n`);
+        if (this.oneMinuteSinceLastProcess(time, this.timeController)) {
+            logger.log(`${time} storing prn indices\n`);
             this.timeController = time;
             await this.processMinute();
         }
     }
 
-    public passouUmMinuto(time: Date): boolean {
-        return (
-            time.getMinutes() > this.timeController.getMinutes() ||
-            time.getHours() > this.timeController.getHours()
-        );
+    public oneMinuteSinceLastProcess(time: Date, lastTime: Date): boolean {
+        return time.getMinutes() > lastTime.getMinutes() || time.getHours() > lastTime.getHours();
     }
 
     public async processMinute() {
         try {
-            logger.log(
-                `salvando prnindices relacionado a ${this.timeController.toISOString()}!`,
-            );
+            logger.log(`storing prn indices for ${this.timeController.toISOString()}!`)
 
-            const rows = await this.prnInfoController.groupByPrn(
-                this.timeController,
-            );
+            const prnResultSize = await this.prnInfoController.groupByPrn(this.timeController);
 
-            logger.log(`Processing ${rows.length} prns`);
+            logger.log(`processing ${prnResultSize.length} lines`);
 
-            //logger.log("PrninfoGrouped", rows);
-            for (const row of rows) {
-                //logger.log(row)
-                if (row.total >= MIN_QTDE) {
-                    let vSnr: number[] = [];
-                    let vIntensidadeSinal: number[] = [];
-                    let intensidadeSinalQuadrado = 0;
-                    let intensidade = 0;
+            for (const prnRow of prnResultSize) {
+                if (prnRow.total < MIN_QTDE) {
+                    logger.log(`prn ${prnRow.prn} has less than ${MIN_QTDE} samples at ${this.timeController.toISOString()}!`);
+                    continue;
+                }
 
-                    try {
-                        const prnData = await this.prnInfoController.findByPrn(
-                            this.timeController,
-                            row.prn,
-                        );
-                        //logger.log('Prn info by minute', prnData[0]);
+                let vectorRawSnr: number[] = [];
+                let vectorSnrInLinearRatio: number[] = [];
+                try {
+                    const prnData = await this.prnInfoController.findByPrn(this.timeController, prnRow.prn);
 
-                        prnData.forEach((row: any) => {
-                            if (row.snr) {
-                                // logger.log(row.prn + " -->" + row.snr);
-                                intensidade = Math.pow(10, row.snr / 10);
-                                //logger.log(row.snr);
-                                vSnr.push(row.snr);
-                                vIntensidadeSinal.push(intensidade);
-                                intensidadeSinalQuadrado += Math.pow(
-                                    intensidade,
-                                    2,
-                                );
-                            }
-                        });
-
-                        if (vSnr.length == 0) {
-                            logger.log("vSnr vazio");
-                            return;
+                    for (const { snr } of prnData) {
+                        if (!snr) {
+                            continue;
                         }
 
-                        let dpSnr = std(vSnr);
-                        intensidadeSinalQuadrado /= vIntensidadeSinal.length;
-                        let mediaIntensidadeSinalQuadrado = Math.pow(
-                            mean(vIntensidadeSinal),
-                            2,
-                        );
-                        let s4 = Math.sqrt(
-                            (intensidadeSinalQuadrado -
-                                mediaIntensidadeSinalQuadrado) /
-                                mediaIntensidadeSinalQuadrado,
-                        );
+                        vectorRawSnr.push(snr);
 
-                        logger.log(`Inserting prnindice`);
-                        await this.prnIndicesController.insertProcessedData(
-                            dpSnr,
-                            s4,
-                            this.timeController,
-                            row.prn,
-                        );
-                    } catch (err: any) {
-                        console.log(err);
-                        logger.exception(err);
+                        // convert snr to linear ratio
+                        vectorSnrInLinearRatio.push(Math.pow(10, snr / 10));
                     }
+
+                    if (vectorRawSnr.length == 0) {
+                        logger.log("vSnr vazio");
+                        continue;
+                    }
+
+                    const dpSnr = Number(std(vectorRawSnr));
+                    const s4Total = this.totalS4(vectorSnrInLinearRatio);
+                    const s4Noise = this.noiseS4(vectorSnrInLinearRatio);
+                    const s4 = Math.sqrt(
+                        Math.max(0, s4Total ** 2 - s4Noise ** 2)
+                    );
+
+                    logger.log(`Inserting prnindice`);
+                    await this.prnIndicesController.insertProcessedData(
+                        dpSnr,
+                        s4,
+                        this.timeController,
+                        prnRow.prn
+                    );
+                } catch (err: any) {
+                    console.log(err);
+                    logger.exception(err);
                 }
             }
         } catch (err: any) {
@@ -208,7 +177,62 @@ export class ProcessData {
     }
 
     /**
-     * @description Função responsável por enfilerar os dados no buffer, antes que sejam processados
+     * @description Fits the least-squares linear trend of `values` and
+     * returns the fitted value for each sample index.
+     */
+    private linearTrend(values: number[]): number[] {
+        const n = values.length;
+
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        for (let i = 0; i < n; i++) {
+            sumX += i;
+            sumY += values[i];
+            sumXY += i * values[i];
+            sumXX += i * i;
+        }
+
+        const denominator = n * sumXX - sumX * sumX;
+        const slope = denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
+        const intercept = (sumY - slope * sumX) / n;
+
+        return values.map((_, i) => intercept + slope * i);
+    }
+
+    /**
+     * @description Total S4 (S4_T): normalized standard deviation of the
+     * signal intensity. The intensity is first detrended by dividing by its
+     * least-squares linear trend, keeping the series positive and its mean
+     * normalized to ~1.
+     * S4_T = sqrt((<SI^2> - <SI>^2) / <SI>^2)
+     */
+    private totalS4(intensities: number[]): number {
+        const trend = this.linearTrend(intensities);
+        const detrended = intensities.map((value, i) =>
+            trend[i] !== 0 ? value / trend[i] : value
+        );
+
+        const meanIntensity = mean(detrended);
+        const meanIntensitySquared = meanIntensity ** 2;
+        const meanOfSquares = mean(detrended.map(value => value ** 2));
+
+        return Math.sqrt(
+            Math.max(0, (meanOfSquares - meanIntensitySquared) / meanIntensitySquared)
+        );
+    }
+
+    /**
+     * @description Noise S4 (S4_N): amplitude fluctuations caused strictly by
+     * ambient noise, estimated from the average linear signal-to-noise
+     * density ratio over the interval: S4_N^2 = 100 / SNR.
+     */
+    private noiseS4(intensities: number[]): number {
+        const meanSnrLinear = mean(intensities);
+
+        return Math.sqrt(100 / meanSnrLinear);
+    }
+
+    /**
+     * @description acumulate data in buffer to be processed later
      */
     async sendToBuffer(custom: SignalMetrics) {
         if (!this.timeController) {
