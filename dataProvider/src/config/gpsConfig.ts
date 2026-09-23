@@ -2,11 +2,6 @@ import { configurator } from "config-validation";
 import path from "node:path";
 import logger from "../logger";
 
-interface GpsConfig {
-    serialInput: string;
-    baudRate: number;
-}
-
 const loader = configurator({
     gps: {
         serialInput: {

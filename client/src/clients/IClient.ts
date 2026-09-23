@@ -25,14 +25,14 @@ export abstract class Client implements IClient {
 
             if (this.connected) {
                 logger.info(`Sending subscribe message to channel ${channel}`);
-                this._sendSubscribeMessage(channel);
+                this.sendSubscribeMessage(channel);
             }
         }
     }
 
-    protected abstract _sendMessage(message: string): void;
+    protected abstract sendMessage(message: string): void;
 
-    protected abstract _sendSubscribeMessage(channel: string): void;
+    protected abstract sendSubscribeMessage(channel: string): void;
 
     onMessage(cb: MessageCB) {
         this.messageCB = cb;
@@ -46,10 +46,10 @@ export abstract class Client implements IClient {
         this.endCB = cb;
     }
 
-    protected abstract _connect(cb: (...args: any[]) => void): void;
+    protected abstract connect(cb: (...args: any[]) => void): void;
 
     async start() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (!this.errorCB) {
                 this.errorCB = (err) => {
                     console.error(err);
@@ -75,13 +75,13 @@ export abstract class Client implements IClient {
                 process.exit(2);
             }, 5000);
 
-            this._connect(() => {
+            this.connect(() => {
                 clearTimeout(timeout);
                 logger.info("Connected");
 
                 this.connectedChannels.forEach((value) => {
                     logger.info(`Subscribing to ${value}`);
-                    this._sendSubscribeMessage(value);
+                    this.sendSubscribeMessage(value);
                 });
 
                 return resolve(undefined);

@@ -10,10 +10,6 @@ export class GPSProvider extends GPS {
     protected parserStream!: parsers.Readline;
     protected writeStream?: WriteStream;
 
-    constructor() {
-        super();
-    }
-
     public serialInput(input: string = config.serialInput): void {
         if (this.inputStream) {
             throw new Error("There is already an input stream");

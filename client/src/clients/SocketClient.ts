@@ -16,17 +16,17 @@ export class SocketClient extends Client {
         this.config = configurations;
     }
 
-    protected _sendMessage(message: string) {
+    protected sendMessage(message: string) {
         logger.info(`Sending message: ${message}`);
         this.client.write(message);
     }
 
-    protected _sendSubscribeMessage(channel: string) {
+    protected sendSubscribeMessage(channel: string) {
         logger.info(`Subscribing to: ${channel}`);
-        this._sendMessage(`sub_${channel}\n`);
+        this.sendMessage(`sub_${channel}\n`);
     }
 
-    protected _connect(cb: (...args: any[]) => void) {
+    protected connect(cb: (...args: any[]) => void) {
         this.client.on("connect", cb);
         this.client.on("data", this.messageCB);
 

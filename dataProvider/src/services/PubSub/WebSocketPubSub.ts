@@ -63,9 +63,9 @@ export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
                         server.listeningChannels.get("cpu") &&
                         server.listeningChannels.get("cpu")!.size > 0
                     ) {
-                        cpu.usage().then((cpu) => {
-                            logger.info(cpu);
-                            server.pub("cpu", `cpu_${cpu}`);
+                        cpu.usage().then((cpuUsage) => {
+                            logger.info(cpuUsage);
+                            server.pub("cpu", `cpu_${cpuUsage}`);
                         });
                     }
 

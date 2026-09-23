@@ -45,7 +45,7 @@ if (nmea) {
             return;
         } else {
             for (const satelite of data.satellites) {
-                -writeStream.write(
+                writeStream.write(
                     `sat_${satelite.prn}_${satelite.snr}_${satelite.azimuth}_${satelite.elevation}_${lat}_${lon}_${time.getTime()}\n`,
                 );
             }

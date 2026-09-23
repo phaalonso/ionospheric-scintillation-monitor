@@ -13,7 +13,7 @@ const UserNav: React.FC = () => {
 
     return (
         <UserContainer>
-            {auth.data.user.nome}
+            {auth.authState.user.nome}
             <button onClick={logout}>
                 <FiLogOut style={{ strokeWidth: 4 }} /> Sair
             </button>

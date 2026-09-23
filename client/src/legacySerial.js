@@ -161,7 +161,7 @@ db.serialize(function () {
                                 db.all(
                                     stmt3,
                                     [dpSnr, s4, time, time, row.prn],
-                                    (err, rows) => {
+                                    (err) => {
                                         if (err) {
                                             throw err;
                                         } else {

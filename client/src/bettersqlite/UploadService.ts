@@ -11,7 +11,7 @@ interface UploadConfig {
 }
 
 export interface FileInfo {
-    path: string;
+    basePath: string;
     fileName: string;
 }
 
@@ -76,7 +76,7 @@ export class UploadService {
     public async uploadFile(file: FileInfo) {
         return new Promise((resolve, reject) => {
             const destPath = path.join(this.config.backupPath, file.fileName);
-            this.client.put(file.path, destPath, false, (error) => {
+            this.client.put(file.basePath, destPath, false, (error) => {
                 if (error) {
                     reject(error);
                 }

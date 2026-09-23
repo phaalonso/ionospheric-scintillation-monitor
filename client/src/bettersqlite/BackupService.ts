@@ -58,17 +58,17 @@ export class BackupService {
                 );
             });
 
-            transaction.immediate(lastDateTime);
+            await transaction.immediate(lastDateTime);
         } catch (err: any) {
             logger.error(err);
             logger.info(`Error while making backup for ${date}`);
         }
     }
 
-    private async uploadFile(name: string, path: string) {
+    private async uploadFile(fileName: string, basePath: string) {
         const info: FileInfo = {
-            path,
-            fileName: name,
+            basePath: basePath,
+            fileName: fileName,
         };
 
         logger.info(`Uploading the file to remote storage`);
