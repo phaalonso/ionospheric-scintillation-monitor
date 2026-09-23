@@ -1,13 +1,16 @@
-import { AmountOfSNRPerPRN, FindByRPNResult, IPrnInfoController } from "../../controller";
+import {
+    AmountOfSNRPerPRN,
+    FindByRPNResult,
+    IPrnInfoController,
+} from "../../controller";
 import { SignalMetrics } from "../../model/SignalMetrics";
 import logger from "../../logger";
 import { PrnInfoModel } from "../database/prninfo";
 
 export class PrnInfoMongo implements IPrnInfoController {
     public async insert(metric: SignalMetrics) {
-        return new PrnInfoModel(metric).save()
-        .catch(err => {
-            logger.error(err, 'On insert prninfo mongo');
+        return new PrnInfoModel(metric).save().catch((err) => {
+            logger.error(err, "On insert prninfo mongo");
         });
     }
 
@@ -63,7 +66,7 @@ export class PrnInfoMongo implements IPrnInfoController {
         return new Promise((res, rej) => {
             PrnInfoModel.countDocuments()
                 .then((count) => res(count))
-                .catch(err => rej(err));
+                .catch((err) => rej(err));
         });
     }
 

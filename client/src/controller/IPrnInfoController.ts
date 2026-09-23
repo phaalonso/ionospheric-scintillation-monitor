@@ -2,17 +2,17 @@ import { SignalMetrics } from "../model/SignalMetrics";
 
 export type FindByRPNResult = {
     snr: number;
-}
+};
 
 export type AmountOfSNRPerPRN = {
     prn: number;
     total: number;
-}
+};
 
 export interface IPrnInfoController {
     insert(metric: SignalMetrics): any;
 
-	insertMany(data: SignalMetrics[]): any;
+    insertMany(data: SignalMetrics[]): any;
 
     /**
      * @description Retorna dados inseridos em prninfo agrupados num intervalo de um minuto relativo ao parametro tempo
@@ -25,7 +25,7 @@ export interface IPrnInfoController {
      * @param time tempo será relativo a esse parametro
      * @param prn informa de qual prn será realizado a filtragem
      */
-	findByPrn(time: Date, prn: number): Promise<FindByRPNResult[]>;
+    findByPrn(time: Date, prn: number): Promise<FindByRPNResult[]>;
     countRows(): Promise<number>;
     deleteBefore(lastDateTime: Date): Promise<void>;
 }

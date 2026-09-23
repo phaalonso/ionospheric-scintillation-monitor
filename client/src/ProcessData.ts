@@ -21,11 +21,11 @@ export class ProcessData {
 
     constructor(
         private readonly prnInfoController: IPrnInfoController,
-        private readonly prnIndicesController: IPrnIndicesController
+        private readonly prnIndicesController: IPrnIndicesController,
     ) {
-        const processConfig = config.get('process');
+        const processConfig = config.get("process");
 
-        logger.info('Iniciando ProcessData');
+        logger.info("Iniciando ProcessData");
 
         this.interval = processConfig.interval;
         this.logInterval = processConfig.logInterval;
@@ -34,15 +34,20 @@ export class ProcessData {
         this.counter = 0;
         this.maxCounter = 60000 / this.interval;
 
-        logger.info(`Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`);
-        logger.info(`Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`);
+        logger.info(
+            `Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`,
+        );
+        logger.info(
+            `Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`,
+        );
 
         this.setupProcess(this.interval);
     }
 
     public async logDBSize() {
         const prninfoLength = await this.prnInfoController.countRows();
-        const prnindicesLength = await this.prnIndicesController.indicesLength();
+        const prnindicesLength =
+            await this.prnIndicesController.indicesLength();
 
         // logger.info(`Quantidade de  dados ${qtd}`);
         logger.info(`prninfo rowCount: ${prninfoLength}`);
@@ -52,7 +57,7 @@ export class ProcessData {
     private setupProcess(interval: number): NodeJS.Timeout {
         const processInterval = async () => {
             if (this.buffer.length == 0) {
-                logger.info('Buffer vazio');
+                logger.info("Buffer vazio");
                 return;
             }
 
@@ -68,15 +73,12 @@ export class ProcessData {
                 this.counter = 0;
                 this.processMinute();
 
-                const timestamp = this.timeController.getTime()
+                const timestamp = this.timeController.getTime();
                 this.timeController = new Date(timestamp + 60000);
             }
-        }
+        };
 
-        return setInterval(
-            processInterval,
-            interval
-        );
+        return setInterval(processInterval, interval);
     }
 
     /**
@@ -87,7 +89,7 @@ export class ProcessData {
         satellite: Satellite[],
         lat: number,
         lon: number,
-        time: Date
+        time: Date,
     ) {
         if (!this.timeController) {
             this.timeController = time;
@@ -113,27 +115,39 @@ export class ProcessData {
     }
 
     public oneMinuteSinceLastProcess(time: Date, lastTime: Date): boolean {
-        return time.getMinutes() > lastTime.getMinutes() || time.getHours() > lastTime.getHours();
+        return (
+            time.getMinutes() > lastTime.getMinutes() ||
+            time.getHours() > lastTime.getHours()
+        );
     }
 
     public async processMinute() {
         try {
-            logger.info(`storing prn indices for ${this.timeController.toISOString()}!`)
+            logger.info(
+                `storing prn indices for ${this.timeController.toISOString()}!`,
+            );
 
-            const prnResultSize = await this.prnInfoController.groupByPrn(this.timeController);
+            const prnResultSize = await this.prnInfoController.groupByPrn(
+                this.timeController,
+            );
 
             logger.info(`processing ${prnResultSize.length} lines`);
 
             for (const prnRow of prnResultSize) {
                 if (prnRow.total < MIN_QTDE) {
-                    logger.info(`prn ${prnRow.prn} has less than ${MIN_QTDE} samples at ${this.timeController.toISOString()}!`);
+                    logger.info(
+                        `prn ${prnRow.prn} has less than ${MIN_QTDE} samples at ${this.timeController.toISOString()}!`,
+                    );
                     continue;
                 }
 
                 let vectorRawSnr: number[] = [];
                 let vectorSnrInLinearRatio: number[] = [];
                 try {
-                    const prnData = await this.prnInfoController.findByPrn(this.timeController, prnRow.prn);
+                    const prnData = await this.prnInfoController.findByPrn(
+                        this.timeController,
+                        prnRow.prn,
+                    );
 
                     for (const { snr } of prnData) {
                         if (!snr) {
@@ -155,7 +169,7 @@ export class ProcessData {
                     const s4Total = this.totalS4(vectorSnrInLinearRatio);
                     const s4Noise = this.noiseS4(vectorSnrInLinearRatio);
                     const s4 = Math.sqrt(
-                        Math.max(0, s4Total ** 2 - s4Noise ** 2)
+                        Math.max(0, s4Total ** 2 - s4Noise ** 2),
                     );
 
                     logger.info(`Inserting prnindice`);
@@ -163,7 +177,7 @@ export class ProcessData {
                         dpSnr,
                         s4,
                         this.timeController,
-                        prnRow.prn
+                        prnRow.prn,
                     );
                 } catch (err: any) {
                     console.log(err);
@@ -183,7 +197,10 @@ export class ProcessData {
     private linearTrend(values: number[]): number[] {
         const n = values.length;
 
-        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        let sumX = 0,
+            sumY = 0,
+            sumXY = 0,
+            sumXX = 0;
         for (let i = 0; i < n; i++) {
             sumX += i;
             sumY += values[i];
@@ -192,7 +209,8 @@ export class ProcessData {
         }
 
         const denominator = n * sumXX - sumX * sumX;
-        const slope = denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
+        const slope =
+            denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
 
         return values.map((_, i) => intercept + slope * i);
@@ -208,15 +226,18 @@ export class ProcessData {
     private totalS4(intensities: number[]): number {
         const trend = this.linearTrend(intensities);
         const detrended = intensities.map((value, i) =>
-            trend[i] !== 0 ? value / trend[i] : value
+            trend[i] !== 0 ? value / trend[i] : value,
         );
 
         const meanIntensity = mean(detrended);
         const meanIntensitySquared = meanIntensity ** 2;
-        const meanOfSquares = mean(detrended.map(value => value ** 2));
+        const meanOfSquares = mean(detrended.map((value) => value ** 2));
 
         return Math.sqrt(
-            Math.max(0, (meanOfSquares - meanIntensitySquared) / meanIntensitySquared)
+            Math.max(
+                0,
+                (meanOfSquares - meanIntensitySquared) / meanIntensitySquared,
+            ),
         );
     }
 

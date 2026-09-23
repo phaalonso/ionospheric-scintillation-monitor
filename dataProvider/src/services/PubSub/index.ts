@@ -1,3 +1,3 @@
-export { PubSub } from './PubSub';
+export { PubSub } from "./PubSub";
 export { SocketPubSub } from "./SocketPubSub";
-export { WebsocketPubSub } from './WebSocketPubSub';
+export { WebsocketPubSub } from "./WebSocketPubSub";

@@ -1,8 +1,8 @@
-import SerialPort, { parsers } from 'serialport';
-import fs, { ReadStream, WriteStream } from 'node:fs';
-import GPS from 'gps';
+import SerialPort, { parsers } from "serialport";
+import fs, { ReadStream, WriteStream } from "node:fs";
+import GPS from "gps";
 import logger from "./logger";
-import { config } from './config/gpsConfig';
+import { config } from "./config/gpsConfig";
 
 //INFO: Talvez seria interessante possuir uma arquitetura Observer para as Streams, permitindo que exista mais de uma Stream no recebimento de dados
 export class GPSProvider extends GPS {
@@ -16,7 +16,7 @@ export class GPSProvider extends GPS {
 
     public serialInput(input: string = config.serialInput): void {
         if (this.inputStream) {
-            throw new Error('There is already an input stream');
+            throw new Error("There is already an input stream");
         }
 
         logger.info(`Receiving data from serial input: ${input}`);
@@ -25,7 +25,7 @@ export class GPSProvider extends GPS {
             baudRate: config.gps.baudRate,
         });
 
-        this.inputStream.on('error', (error) => {
+        this.inputStream.on("error", (error) => {
             console.error(error);
             // process.exit(1);
         });
@@ -33,50 +33,53 @@ export class GPSProvider extends GPS {
 
     public readFromFile(fileInput: string) {
         if (this.inputStream) {
-            throw new Error('There is already an input stream');
+            throw new Error("There is already an input stream");
         }
 
         logger.info(`Receiving data from file input ${fileInput}`);
 
         this.inputStream = fs.createReadStream(fileInput);
 
-        this.inputStream.on('error', err => {
-            logger.error(err, 'Serial port')
+        this.inputStream.on("error", (err) => {
+            logger.error(err, "Serial port");
             process.exit(1);
         });
 
-        this.inputStream.on('end', () => {
-            logger.info('End of the file');
+        this.inputStream.on("end", () => {
+            logger.info("End of the file");
             process.exit(1);
         });
     }
 
-	/**
-	* @description método responsável por inicializar as streams utilizadas para
-	* o recebimento de dados no formato NMEA
-	*/
+    /**
+     * @description método responsável por inicializar as streams utilizadas para
+     * o recebimento de dados no formato NMEA
+     */
     public parse(): void {
         logger.info(`Piping data to GPS`);
 
         this.parserStream = new parsers.Readline({
-            delimiter: '\r\n',
+            delimiter: "\r\n",
         });
 
-        this.parserStream.on('error', err => {
-            logger.error(err, 'Parser');
+        this.parserStream.on("error", (err) => {
+            logger.error(err, "Parser");
         });
 
         this.inputStream.pipe(this.parserStream);
 
-        this.parserStream.on('data', (data) => {
-			try {
-				this.update(data);
-			} catch (error) {
-				logger.error(error instanceof Error ? error : String(error), 'Parser');
-			}
+        this.parserStream.on("data", (data) => {
+            try {
+                this.update(data);
+            } catch (error) {
+                logger.error(
+                    error instanceof Error ? error : String(error),
+                    "Parser",
+                );
+            }
         });
 
-		this.on('error', (err: Error) => logger.error(err));
+        this.on("error", (err: Error) => logger.error(err));
     }
 
     /**
