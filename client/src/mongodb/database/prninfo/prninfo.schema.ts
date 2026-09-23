@@ -1,28 +1,26 @@
 import { Schema } from "mongoose";
 
-const { Number, Date } = Schema.Types;
-
 const PrnInfoSchema = new Schema({
     prn: {
-        type: Number,
+        type: Schema.Types.Number,
     },
     snr: {
-        type: Number,
+        type: Schema.Types.Number,
     },
     azi: {
-        type: Number,
+        type: Schema.Types.Number,
     },
     elev: {
-        type: Number,
+        type: Schema.Types.Number,
     },
     lat: {
-        type: Number,
+        type: Schema.Types.Number,
     },
     long: {
-        type: Number,
+        type: Schema.Types.Number,
     },
     time: {
-        type: Date,
+        type: Schema.Types.Date,
         required: true,
         index: true,
     },

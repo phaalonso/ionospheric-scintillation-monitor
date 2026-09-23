@@ -1,4 +1,4 @@
-import net from "net";
+import net from "node:net";
 import logger from "../logger";
 import { Client } from "./IClient";
 
@@ -8,25 +8,25 @@ interface SocketClientConfig {
 }
 
 export class SocketClient extends Client {
-    private client = new net.Socket();
-    private config: SocketClientConfig;
+    private readonly client = new net.Socket();
+    private readonly config: SocketClientConfig;
 
     constructor(configurations: SocketClientConfig) {
         super();
         this.config = configurations;
     }
 
-    protected _sendMessage(message: string) {
-        logger.log(`Sending message: ${message}`);
+    protected sendMessage(message: string) {
+        logger.info(`Sending message: ${message}`);
         this.client.write(message);
     }
 
-    protected _sendSubscribeMessage(channel: string) {
-        logger.log(`Subscribing to: ${channel}`);
-        this._sendMessage(`sub_${channel}\n`);
+    protected sendSubscribeMessage(channel: string) {
+        logger.info(`Subscribing to: ${channel}`);
+        this.sendMessage(`sub_${channel}\n`);
     }
 
-    protected _connect(cb: (...args: any[]) => void) {
+    protected connect(cb: (...args: any[]) => void) {
         this.client.on("connect", cb);
         this.client.on("data", this.messageCB);
 

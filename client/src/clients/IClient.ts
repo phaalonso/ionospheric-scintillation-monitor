@@ -13,7 +13,7 @@ export interface IClient {
 }
 
 export abstract class Client implements IClient {
-    private connectedChannels = new Set<string>();
+    private readonly connectedChannels = new Set<string>();
     protected connected = false;
     protected messageCB!: MessageCB;
     protected errorCB!: ErrorCB;
@@ -24,15 +24,15 @@ export abstract class Client implements IClient {
             this.connectedChannels.add(channel);
 
             if (this.connected) {
-                logger.log(`Sending subscribe message to channel ${channel}`);
-                this._sendSubscribeMessage(channel);
+                logger.info(`Sending subscribe message to channel ${channel}`);
+                this.sendSubscribeMessage(channel);
             }
         }
     }
 
-    protected abstract _sendMessage(message: string): void;
+    protected abstract sendMessage(message: string): void;
 
-    protected abstract _sendSubscribeMessage(channel: string): void;
+    protected abstract sendSubscribeMessage(channel: string): void;
 
     onMessage(cb: MessageCB) {
         this.messageCB = cb;
@@ -46,10 +46,10 @@ export abstract class Client implements IClient {
         this.endCB = cb;
     }
 
-    protected abstract _connect(cb: (...args: any[]) => void): void;
+    protected abstract connect(cb: (...args: any[]) => void): void;
 
     async start() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (!this.errorCB) {
                 this.errorCB = (err) => {
                     console.error(err);
@@ -58,28 +58,30 @@ export abstract class Client implements IClient {
             }
 
             if (!this.messageCB) {
-                throw Error("Message callback is undefined");
+                throw new Error("Message callback is undefined");
             }
 
             if (!this.endCB) {
                 this.endCB = () => {
-                    logger.log("End");
+                    logger.info("End");
                     process.exit(1);
                 };
             }
 
             const timeout = setTimeout(() => {
-                logger.log("Não foi possível conectar com o provedor de dados");
+                logger.info(
+                    "Não foi possível conectar com o provedor de dados",
+                );
                 process.exit(2);
             }, 5000);
 
-            this._connect(() => {
+            this.connect(() => {
                 clearTimeout(timeout);
-                logger.log("Connected");
+                logger.info("Connected");
 
                 this.connectedChannels.forEach((value) => {
-                    logger.log(`Subscribing to ${value}`);
-                    this._sendSubscribeMessage(value);
+                    logger.info(`Subscribing to ${value}`);
+                    this.sendSubscribeMessage(value);
                 });
 
                 return resolve(undefined);

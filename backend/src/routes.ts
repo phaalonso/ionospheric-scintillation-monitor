@@ -5,6 +5,7 @@ import prisma from "./client";
 import sessions from "./routes/sessions";
 import user from "./routes/users";
 import { statsRouter } from "./routes/stats";
+import logger from "./logger";
 
 const router = Router();
 
@@ -36,7 +37,7 @@ router.get("/scintilation", async (req, res) => {
 
         //@ts-ignore
         const data: IndicesPorPrn[] = prns;
-        console.log(prns);
+        logger.info(prns);
 
         for (const prn of data) {
             const scintilation = await prisma.prnindices.findMany({
@@ -62,7 +63,7 @@ router.get("/scintilation", async (req, res) => {
 
         return res.json({ data });
     } catch (error) {
-        console.log(error);
+        logger.error(error);
         res.send(400).json({ message: "Erro desconhecido" });
     }
 });
@@ -74,13 +75,13 @@ router.use((req, res) => {
 router.use(errors());
 
 router.use((error: any, req: Request, res: Response) => {
-    console.log("error handler");
-    console.log("Error type", typeof error);
+    logger.info("error handler");
+    logger.info("Error type %s", typeof error);
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        console.log(error.message);
+        logger.error(error.message);
         return res.sendStatus(409);
     }
-    console.log(error);
+    logger.error(error);
 
     return res.sendStatus(400);
 });

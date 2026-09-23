@@ -1,4 +1,4 @@
-import net from "net";
+import net from "node:net";
 
 const handleConnection = (socket: net.Socket) => {
     console.log("Alguem se conectou");
@@ -18,7 +18,6 @@ const handleConnection = (socket: net.Socket) => {
         if (str == "end") {
             socket.end();
             socket.destroy();
-            return;
         }
     });
 

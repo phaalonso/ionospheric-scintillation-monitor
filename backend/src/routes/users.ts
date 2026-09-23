@@ -4,6 +4,7 @@ import { Router } from "express";
 import { requireAdmin } from "../middlewares/requireAdmin";
 import { requireAuthentication } from "../middlewares/requireAuthentication";
 import UserService from "../services/UserService";
+import logger from "../logger";
 
 const user = Router();
 
@@ -27,7 +28,7 @@ user.get(
         // Restringe para pesquisar seus próprios dados, ou permitir
         // pesquisar dos outros caso seja um administrador
 
-        const users = await UserService.findById(parseInt(id));
+        const users = await UserService.findById(Number.parseInt(id));
 
         return res.json(users);
     },
@@ -117,17 +118,17 @@ user.put(
             });
 
             return res.status(200).json({ id: result });
-        } catch (error) {
+        } catch (error: unknown) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code == "P2025") {
-                    console.log(error);
+                    logger.error(error);
                     return res.status(404).send();
                 }
-                if (error.code == "P2002")
+                if (error.code == "P2002") {
                     return res.status(409).json({
-                        message: `Conflict in ${error.meta["target"].join(", ")}`,
+                        message: `Conflict in ${error.meta?.target?.join(", ")}`,
                     });
-                else return res.sendStatus(409);
+                } else return res.sendStatus(409);
             }
 
             return next(error);
@@ -152,7 +153,7 @@ user.delete(
 
             return res.status(200).send();
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return res.sendStatus(404);
         }
     },

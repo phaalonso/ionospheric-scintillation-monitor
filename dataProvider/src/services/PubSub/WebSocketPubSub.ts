@@ -6,7 +6,7 @@ import logger from "../../logger";
 const { cpu, mem } = osu;
 
 export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
-    private wsS: WebSocket.Server;
+    private readonly wsS: WebSocket.Server;
 
     constructor() {
         super("send");
@@ -30,7 +30,7 @@ export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
     private handleNewConnection() {
         this.wsS.on("connection", (socket: CustomSocket<WebSocket>) => {
             console.log(`Nova conexão criada`);
-            socket.channels = []; // Canais aos quais o socket está conecatdo
+            socket.channels = []; // Canais aos quais o socket está conectado
 
             socket.on("message", (data) => {
                 this.handleMessage(socket, data);
@@ -45,17 +45,17 @@ export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
     private errorHandler() {
         this.wsS.on("error", (err) => {
             if (err.name === "EADDRINUSE") {
-                logger.log("Endereço já está em uso, tentando novamente...");
+                logger.info("Endereço já está em uso, tentando novamente...");
                 this.wsS.close();
             } else {
-                logger.log(err);
+                logger.error(err);
             }
         });
     }
 
     private listening() {
         this.wsS.on("listening", () => {
-            logger.log(`Servidor iniciado em`, this.wsS.address());
+            logger.info(`servidor iniciado em ${this.wsS.address()}`);
 
             setInterval(
                 (server: WebsocketPubSub) => {
@@ -63,9 +63,9 @@ export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
                         server.listeningChannels.get("cpu") &&
                         server.listeningChannels.get("cpu")!.size > 0
                     ) {
-                        cpu.usage().then((cpu) => {
-                            logger.log(cpu);
-                            server.pub("cpu", `cpu_${cpu}`);
+                        cpu.usage().then((cpuUsage) => {
+                            logger.info(cpuUsage);
+                            server.pub("cpu", `cpu_${cpuUsage}`);
                         });
                     }
 
@@ -73,9 +73,9 @@ export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
                         server.listeningChannels.get("ram") &&
                         server.listeningChannels.get("ram")!.size > 0
                     ) {
-                        //logger.log(mem.totalMem());
+                        //logger.info(mem.totalMem());
                         mem.used().then((ram) => {
-                            logger.log(ram.usedMemMb);
+                            logger.info(ram.usedMemMb);
                             server.pub("ram", `ram_${ram.usedMemMb}`);
                         });
                     }

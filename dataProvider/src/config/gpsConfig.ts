@@ -1,11 +1,6 @@
 import { configurator } from "config-validation";
-import path from "path";
+import path from "node:path";
 import logger from "../logger";
-
-interface GpsConfig {
-    serialInput: string;
-    baudRate: number;
-}
 
 const loader = configurator({
     gps: {
@@ -46,4 +41,4 @@ loader.load(path.join(__dirname, "..", "..", "config.json"));
 
 export const config = loader.getConfig();
 
-logger.log("Config utilizada:", loader);
+logger.info("Config utilizada:", loader);

@@ -9,8 +9,9 @@ export const connect = async () => {
         if (connection) return resolve(connection);
 
         if (!MongoConfig.url) {
-            logger.log(`Nao foi possivel carregar a url ${MongoConfig.url}`);
-            reject();
+            reject(
+                new Error(`Nao foi possivel carregar a url ${MongoConfig.url}`),
+            );
         }
 
         Mongoose.connect(MongoConfig.url, MongoConfig.options)
@@ -18,12 +19,12 @@ export const connect = async () => {
                 connection = Mongoose.connection;
 
                 connection.once("open", async () => {
-                    logger.log("Conectado ao banco de dados");
+                    logger.info("Conectado ao banco de dados");
                 });
 
                 connection.on("error", async (err) => {
-                    logger.log("Erro no banco de dados");
-                    logger.log(err);
+                    logger.info("Erro no banco de dados");
+                    logger.error(err);
                 });
 
                 resolve(connection);
@@ -36,5 +37,5 @@ export const disconnect = async () => {
     if (!connection) return;
 
     await Mongoose.disconnect();
-    logger.log("Desconectado!");
+    logger.info("Desconectado!");
 };

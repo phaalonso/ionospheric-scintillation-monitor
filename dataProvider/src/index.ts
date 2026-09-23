@@ -43,7 +43,7 @@ async function start() {
         // 1000 * 60 * 5 - 5 minutos
         setInterval(
             (qtd) => {
-                logger.log(`Quantidade de dados enviadas: ${qtd.getQtd()}`);
+                logger.info(`Quantidade de dados enviadas: ${qtd.getQtd()}`);
             },
             config.log.qtdEnvioInterval,
             qtd,
@@ -78,11 +78,11 @@ async function start() {
         });
 
         gpsReceiver.on("error", (err: Error) => {
-            logger.log("Erro no GnssDataStream");
-            logger.log(err);
+            logger.info("Erro no GnssDataStream");
+            logger.error(err);
         });
     } catch (err) {
-        logger.exception(err instanceof Error ? err : String(err));
+        logger.error(err instanceof Error ? err : String(err));
         process.exit(1);
     }
 }

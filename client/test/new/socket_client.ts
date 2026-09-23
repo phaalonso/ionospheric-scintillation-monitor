@@ -1,5 +1,5 @@
-import net from "net";
-import readline from "readline";
+import net from "node:net";
+import readline from "node:readline";
 
 const client = new net.Socket();
 const rl = readline.createInterface({

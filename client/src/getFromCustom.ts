@@ -30,7 +30,7 @@ async function run() {
     const messageHandler = new MessageHandler(processData);
 
     stream.on("open", () => {
-        logger.log("Stream open");
+        logger.info("Stream open");
     });
 
     stream.on("data", messageHandler.handle);

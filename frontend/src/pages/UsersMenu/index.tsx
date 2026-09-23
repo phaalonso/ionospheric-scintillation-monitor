@@ -43,7 +43,7 @@ const UsersMenu: React.FC = () => {
     // };
 
     const onUserDelete = async (userId: number) => {
-        const hasAnotherAdmin = users.find(
+        const hasAnotherAdmin = users.some(
             (u) => u.id !== userId && u.administrator,
         );
 
@@ -88,9 +88,9 @@ const UsersMenu: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((user, index) => (
+                            {users.map((user) => (
                                 <tr
-                                    key={index}
+                                    key={user.id}
                                     // onClick={() => onRowClick(index)}
                                     // className={selectIndex === index ? "active" : ""}
                                 >

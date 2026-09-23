@@ -1,4 +1,4 @@
-import { IPrnIndicesController } from "../../controller/IPrnIndicesController";
+import { IPrnIndicesController } from "../../controller";
 import { IPrnIndices, PrnIndicesModel } from "../database/prnindices";
 import logger from "../../logger";
 import { PrnInfoModel } from "../database/prninfo";
@@ -50,7 +50,7 @@ export class PrnIndicesMongo implements IPrnIndicesController {
                 .save()
                 // .then(() => console.log('Saved prnindice'))
                 .catch((err) => {
-                    logger.exception(err, "On insert prnindices Mongo");
+                    logger.error(err, "On insert prnindices Mongo");
                 })
         );
     }

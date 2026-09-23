@@ -106,7 +106,9 @@ const AuthProvider: React.FC = ({ children }) => {
     }, [data.token, singOut]);
 
     return (
-        <AuthContext.Provider value={{ data, singIn, singOut, updateUser }}>
+        <AuthContext.Provider
+            value={{ data: data, singIn, singOut, updateUser }}
+        >
             {children}
         </AuthContext.Provider>
     );

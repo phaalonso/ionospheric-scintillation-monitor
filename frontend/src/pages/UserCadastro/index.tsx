@@ -9,7 +9,7 @@ import getValidationError from "../../utils/ValidationErrors";
 import Toggle from "../../components/Toggle";
 import { api } from "../../services/api";
 import { useHistory, useLocation } from "react-router";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios from "axios";
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);

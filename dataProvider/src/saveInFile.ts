@@ -1,6 +1,6 @@
-import path from "path";
+import path from "node:path";
 import { GPSProvider } from "./GnssDataStream";
-import { createWriteStream } from "fs";
+import { createWriteStream } from "node:fs";
 import logger from "./logger";
 
 const nmea = false;
@@ -10,7 +10,7 @@ const stream = new GPSProvider();
 if (nmea) {
     const filePath = path.join(__dirname, "..", "..", "gpsData.nmea");
 
-    logger.log(`Saving data into ${filePath}`);
+    logger.info(`Saving data into ${filePath}`);
     stream.serialInput("/dev/ttyUSB0");
 
     stream.writeToFile(filePath);
@@ -18,7 +18,7 @@ if (nmea) {
     const filePath = path.join(__dirname, "..", "..", "gpsData.custom");
     const writeStream = createWriteStream(filePath);
 
-    logger.log(`Saving data into ${filePath}`);
+    logger.info(`Saving data into ${filePath}`);
 
     stream.serialInput("/dev/ttyUSB0");
 

@@ -11,7 +11,7 @@ interface UploadConfig {
 }
 
 export interface FileInfo {
-    path: string;
+    basePath: string;
     fileName: string;
 }
 
@@ -32,13 +32,13 @@ export class UploadService {
         });
 
         this.client.on("error", (err) => {
-            logger.exception(err, "BackupService (FTP)");
+            logger.error(err, "BackupService (FTP)");
         });
     }
 
     public async connect() {
-        return new Promise((resolve, reject) => {
-            logger.log("Connecting to upload service");
+        return new Promise((resolve) => {
+            logger.info("Connecting to upload service");
             this.client.connect({
                 host: this.config.host,
                 password: this.config.password,
@@ -48,7 +48,7 @@ export class UploadService {
 
             this.client.on("ready", () => {
                 this.ready = true;
-                logger.log("Backup service (FTP) is ready!");
+                logger.info("Backup service (FTP) is ready!");
 
                 // this.client.list(this.config.backupPath, (err, list) => {
                 // 	if (err) {
@@ -58,7 +58,7 @@ export class UploadService {
                 // 				console.log('AAAAAAa')
                 // 				if (err) return reject(err);
 
-                // 				logger.log('Creating directory');
+                // 				logger.info('Creating directory');
 
                 // 				resolve(undefined);
                 // 			});
@@ -76,7 +76,7 @@ export class UploadService {
     public async uploadFile(file: FileInfo) {
         return new Promise((resolve, reject) => {
             const destPath = path.join(this.config.backupPath, file.fileName);
-            this.client.put(file.path, destPath, false, (error) => {
+            this.client.put(file.basePath, destPath, false, (error) => {
                 if (error) {
                     reject(error);
                 }

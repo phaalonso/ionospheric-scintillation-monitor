@@ -3,6 +3,7 @@ import { NextFunction } from "express-serve-static-core";
 import jwt from "jsonwebtoken";
 import { SERVER } from "../config/server";
 import { DecodedJWTContent } from "../routes/sessions";
+import logger from "../logger";
 
 export function requireAuthentication(
     req: Request,
@@ -18,9 +19,9 @@ export function requireAuthentication(
     try {
         const [, token] = authHeader.split(" ");
 
-        const decoded = jwt.verify(token, SERVER.JWT);
+        const decoded = jwt.verify(token, SERVER!.JWT!);
 
-        console.log(decoded);
+        logger.info(decoded);
 
         const { id } = decoded as DecodedJWTContent;
         req.user = { id };

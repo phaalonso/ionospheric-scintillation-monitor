@@ -9,10 +9,10 @@ export class SQLite {
         this.filePath = dbFilePath || "dados.db";
         try {
             this.con = new Database(this.filePath);
-            logger.log("Conectado ao banco de dados");
+            logger.info("Conectado ao banco de dados");
             this.con.pragma("synchronous=OFF");
         } catch (err) {
-            logger.exception("Não foi possível conectar com o banco de dados");
+            logger.error(err, "Não foi possível conectar com o banco de dados");
             process.exit(1);
         }
     }
@@ -26,7 +26,7 @@ export class SQLite {
 
                 resolve({ id: res.lastInsertRowid });
             } catch (err) {
-                logger.log(`Exception ao executar ${sql}`);
+                logger.info(`Exception ao executar ${sql}`);
                 reject(err);
             }
         });
@@ -41,8 +41,8 @@ export class SQLite {
 
                 res(result);
             } catch (err: any) {
-                logger.log(`Exception ao executar ${sql}`);
-                logger.exception(err);
+                logger.info(`Exception ao executar ${sql}`);
+                logger.error(err);
                 rej(err);
             }
         });
@@ -57,8 +57,8 @@ export class SQLite {
 
                 res(result);
             } catch (err: any) {
-                logger.log(`Exception ao executar ${sql}`);
-                logger.exception(err);
+                logger.info(`Exception ao executar ${sql}`);
+                logger.error(err);
                 rej(err);
             }
         });

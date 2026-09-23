@@ -1,13 +1,17 @@
-import { IPrnInfoController } from "../../controller/IPrnInfoController";
+import {
+    AmountOfSNRPerPRN,
+    FindByRPNResult,
+    IPrnInfoController,
+} from "../../controller/IPrnInfoController";
 import { SQLite } from "../database/DAO";
 import logger from "../../logger";
 import { SignalMetrics } from "../../model/SignalMetrics";
 
 export class PrnInfoBetterSqlite implements IPrnInfoController {
-    constructor(private dao: SQLite) {}
+    constructor(private readonly dao: SQLite) {}
 
     async createTable() {
-        logger.log("Criando prninfo");
+        logger.info("Criando prninfo");
         const sql = `
 			CREATE TABLE IF NOT EXISTS prninfo (
 				id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -55,26 +59,26 @@ export class PrnInfoBetterSqlite implements IPrnInfoController {
     }
 
     /**
-     * @description Retorna dados inseridos em prninfo agrupados em um intervalo de um minuto relativo ao parametro time
-     * @param time tempo sera relativo a esse parametro
+     * @description Retorna dados inseridos em prninfo agrupados num intervalo de um minuto relativo ao parametro time
+     * @param time tempo será relativo a esse parametro
      */
-    public groupByPrn(time: Date): Promise<any> {
+    public async groupByPrn(time: Date): Promise<AmountOfSNRPerPRN[]> {
         return this.dao.all(
             "select prn, count(snr) as total from prninfo where time between datetime(?, '-1 minute') and datetime(?) group by prn",
             [time.toISOString(), time.toISOString()],
-        );
+        ) as Promise<AmountOfSNRPerPRN[]>;
     }
 
     /**
-     * @description Seleciona prn e snr de determinado prn em um periodo de um minuto relativo ao parametro time
-     * @param time tempo sera relativo a esse parametro
+     * @description seleciona prn e snr de determinado prn num periodo de um minuto relativo ao parametro time
+     * @param time tempo será relativo a esse parametro
      * @param prn informa de qual prn será realizado a filtragem
      */
-    public findByPrn(time: Date, prn: number): Promise<any> {
+    public findByPrn(time: Date, prn: number): Promise<FindByRPNResult[]> {
         return this.dao.all(
             "SELECT prn, snr FROM prninfo WHERE time BETWEEN datetime(?, '-1 minute') AND datetime(?) AND prn = ?",
             [time.toISOString(), time.toISOString(), prn],
-        );
+        ) as Promise<FindByRPNResult[]>;
     }
 
     async countRows(): Promise<number> {
@@ -91,6 +95,6 @@ export class PrnInfoBetterSqlite implements IPrnInfoController {
 
         const res = stmt.run(lastDateTime.toISOString());
 
-        logger.log(`Removed ${res.changes} rows from PrnInfo`);
+        logger.info(`Removed ${res.changes} rows from PrnInfo`);
     }
 }

@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import http from "http";
+import http from "node:http";
 import express from "express";
 import morgan from "morgan";
 
@@ -10,6 +10,7 @@ import { createTopic, WebsocketFactory } from "./Websocket";
 import { monitoring } from "./monitoring";
 import prisma from "./client";
 import UserService from "./services/UserService";
+import logger from "./logger";
 
 const app = express();
 
@@ -38,11 +39,11 @@ async function main() {
                 administrator: true,
             });
 
-            console.log(
+            logger.info(
                 "Não foi encontrado um usuário administrador, por isso foi criado um usuário padrão. Por favor altere as credenciais de acesso",
             );
-            console.log("Email: admin@admin.com");
-            console.log("Senha: changeit");
+            logger.info("Email: admin@admin.com");
+            logger.info("Senha: changeit");
         }
 
         WebsocketFactory(server);
@@ -51,7 +52,7 @@ async function main() {
         createTopic("ram");
 
         server.listen(3333, () => {
-            console.log("Server is online");
+            logger.info("Server is online");
 
             setInterval(monitoring, 500);
         });

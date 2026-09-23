@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { GPSProvider } from "../../dataProvider/src/GnssDataStream";
 import { ProcessData } from "./ProcessData";
 import { SignalMetrics } from "./model/SignalMetrics";

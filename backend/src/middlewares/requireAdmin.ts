@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import UserService from "../services/UserService";
+import logger from "../logger";
 
 export async function requireAdmin(
     req: Request,
@@ -7,15 +8,15 @@ export async function requireAdmin(
     next: NextFunction,
 ) {
     try {
-        if (req.user && req.user.id) {
+        if (req.user?.id) {
             const user = await UserService.findById(req.user.id);
 
-            if (user && user.administrator) return next();
+            if (user?.administrator) return next();
         }
 
         return res.sendStatus(403);
     } catch (error) {
-        console.log(error);
+        logger.error(error);
         return res.status(400).send();
     }
 }

@@ -1,6 +1,6 @@
 import { SQLite } from "./database/DAO";
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import logger from "../logger";
 import { FileInfo, UploadService } from "./UploadService";
 import { IPrnIndicesController, IPrnInfoController } from "../controller";
@@ -15,11 +15,11 @@ export class BackupService {
     private timeout?: NodeJS.Timeout;
 
     constructor(
-        private dao: SQLite,
-        private prnIndiceService: IPrnIndicesController,
-        private prnInfoService: IPrnInfoController,
-        private config: IBackupConfig,
-        private uploadService: UploadService,
+        private readonly dao: SQLite,
+        private readonly prnIndiceService: IPrnIndicesController,
+        private readonly prnInfoService: IPrnInfoController,
+        private readonly config: IBackupConfig,
+        private readonly uploadService: UploadService,
     ) {}
 
     public async backup() {
@@ -36,42 +36,42 @@ export class BackupService {
             );
 
             if (this.dao.con.inTransaction) {
-                throw Error("The database is already in a transaction");
+                throw new Error("The database is already in a transaction");
             }
 
             const lastDateTime = await this.prnIndiceService.lastIndice();
 
             const transaction = this.dao.con.transaction(async (lastTime) => {
                 if (!lastTime) {
-                    logger.log(`Can't locate the last PrnIndices time`);
+                    logger.info(`Can't locate the last PrnIndices time`);
                 }
 
-                logger.log(`Backuping data up to ${lastTime}`);
+                logger.info(`Backuping data up to ${lastTime}`);
 
                 const res = await this.dao.con.backup(destination);
 
                 await this.prnIndiceService.deleteBefore(lastTime);
                 await this.prnInfoService.deleteBefore(lastTime);
 
-                logger.log(
+                logger.info(
                     `Backup realizado! Total de páginas ${res.totalPages}, páginas restantes ${res.remainingPages}`,
                 );
             });
 
-            transaction.immediate(lastDateTime);
+            await transaction.immediate(lastDateTime);
         } catch (err: any) {
-            logger.exception(err);
-            logger.log(`Error while making backup for ${date}`);
+            logger.error(err);
+            logger.info(`Error while making backup for ${date}`);
         }
     }
 
-    private async uploadFile(name: string, path: string) {
+    private async uploadFile(fileName: string, basePath: string) {
         const info: FileInfo = {
-            path,
-            fileName: name,
+            basePath: basePath,
+            fileName: fileName,
         };
 
-        logger.log(`Uploading the file to remote storage`);
+        logger.info(`Uploading the file to remote storage`);
         await this.uploadService.uploadFile(info);
     }
 
@@ -89,13 +89,13 @@ export class BackupService {
                 await this.uploadFile(file, filePath);
 
                 fs.rm(filePath, () => {
-                    logger.log(`Removing the file ${file} from local storage`);
+                    logger.info(`Removing the file ${file} from local storage`);
                 });
             }
 
             this.uploadService.disconnect();
         } catch (err: any) {
-            logger.exception(err, "sendToServer");
+            logger.error(err, "sendToServer");
         }
     }
 
@@ -119,7 +119,7 @@ export class BackupService {
         if (this.hasAutoBackupEnabled()) {
             clearInterval(this.timeout!);
         } else {
-            throw Error("Auto backup is not initialized");
+            throw new Error("Auto backup is not initialized");
         }
     }
 }

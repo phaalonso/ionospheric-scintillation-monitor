@@ -1,5 +1,5 @@
 import { configurator } from "config-validation";
-import path from "path";
+import path from "node:path";
 
 const config = configurator({
     client: {

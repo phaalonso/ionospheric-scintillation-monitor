@@ -55,6 +55,6 @@ export class MessageHandler {
             return;
         }
 
-        logger.log(`mensagem inválida  ${message}`);
+        logger.info(`mensagem inválida  ${message}`);
     }
 }

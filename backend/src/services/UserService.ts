@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import prisma from "../client";
 import { LoginCredentials } from "../interfaces/LoginDTO";
 import { UserDTO } from "../interfaces/UserDTO";
+import logger from "../logger";
 
 const UserService = {
     async hasAdmin(): Promise<boolean> {
@@ -27,7 +28,7 @@ const UserService = {
         });
     },
 
-    async findById(id: number): Promise<UserDTO> {
+    async findById(id: number): Promise<UserDTO | null> {
         return prisma.user.findUnique({
             where: { id },
             select: {
@@ -45,7 +46,7 @@ const UserService = {
     async create(user: Prisma.UserCreateInput): Promise<number> {
         const encryptedPassword = await bcrypt.hash(user.password, 8);
 
-        console.log(user);
+        logger.info(user);
 
         user.password = encryptedPassword;
 
@@ -64,7 +65,7 @@ const UserService = {
             delete user.password;
         }
 
-        console.log(user);
+        logger.info(user);
 
         const createdUser = await prisma.user.update({
             where: {
@@ -76,7 +77,9 @@ const UserService = {
         return createdUser.id;
     },
 
-    async login(login: LoginCredentials): Promise<Partial<User>> {
+    async login(
+        login: LoginCredentials,
+    ): Promise<Omit<User, "email" | "password"> | undefined> {
         const user = await prisma.user.findUnique({
             where: {
                 email: login.email,
@@ -88,11 +91,12 @@ const UserService = {
                 nickname: true,
                 password: true,
                 administrator: true,
+                createdAt: true,
             },
         });
 
         if (!user) {
-            throw Error("Não encontrado");
+            throw new Error("Não encontrado");
         }
 
         if (await bcrypt.compare(login.password, user.password)) {
@@ -101,14 +105,15 @@ const UserService = {
                 nickname: user.nickname,
                 nome: user.nome,
                 administrator: user.administrator,
+                createdAt: user.createdAt,
             };
         }
 
         return undefined;
     },
 
-    async delete(userId) {
-        const result = await prisma.user.delete({
+    async delete(userId: number) {
+        await prisma.user.delete({
             where: { id: userId },
         });
     },

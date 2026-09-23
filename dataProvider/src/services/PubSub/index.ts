@@ -1,5 +1,3 @@
-import { PubSub } from "./PubSub";
-import { SocketPubSub } from "./SocketPubSub";
-import { WebsocketPubSub } from "./WebSocketPubSub";
-
-export { PubSub, SocketPubSub, WebsocketPubSub };
+export { PubSub } from "./PubSub";
+export { SocketPubSub } from "./SocketPubSub";
+export { WebsocketPubSub } from "./WebSocketPubSub";

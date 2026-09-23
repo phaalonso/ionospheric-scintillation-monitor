@@ -39,7 +39,7 @@ for (let i = 0; i < 40; i++) {
 const MAX_DATA_LENGTH = 100;
 
 const Graphics: React.FC = () => {
-    const { data } = useAuth();
+    const { data: authState } = useAuth();
 
     const [totalRam, setTotalRam] = useState<number>();
     const [ramData, setRamData] = useState<GraphicData[]>([]);
@@ -51,7 +51,7 @@ const Graphics: React.FC = () => {
         {
             onOpen: () => {
                 console.log("Conexão aberta");
-                sendMessage(`token_${data.token}`);
+                sendMessage(`token_${authState.token}`);
             },
             onError: (error) => console.error(error),
             onClose: () => {
@@ -67,7 +67,7 @@ const Graphics: React.FC = () => {
 
                     const data: GraphicData = {
                         time: new Date(),
-                        value: parseFloat(ramMatch[1]),
+                        value: Number.parseFloat(ramMatch[1]),
                     };
 
                     if (ramData.length > MAX_DATA_LENGTH) {
@@ -85,7 +85,7 @@ const Graphics: React.FC = () => {
 
                     const data: GraphicData = {
                         time: new Date(),
-                        value: parseFloat(cpuMatch[1]),
+                        value: Number.parseFloat(cpuMatch[1]),
                     };
 
                     if (cpuData.length > MAX_DATA_LENGTH) {

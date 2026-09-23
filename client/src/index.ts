@@ -10,6 +10,8 @@ import { PrnIndicesMongo } from "./mongodb/controller/PrnIndicesMongo";
 import { PrnInfoMongo } from "./mongodb/controller/PrnInfoMongo";
 import { connect } from "./mongodb/database/connection";
 import { ProcessData } from "./ProcessData";
+import { setInterval } from "node:timers";
+import config from "./config/ConfigProvider";
 
 let prnInfoController: IPrnInfoController;
 let prnIndicesController: IPrnIndicesController;
@@ -18,7 +20,7 @@ async function initDatabase() {
     const selectedDB = process.env.DB;
 
     if (!selectedDB) {
-        logger.log("can't find the DB variable");
+        logger.info("can't find the DB variable");
         process.exit(1);
     }
 
@@ -41,13 +43,14 @@ async function initDatabase() {
             break;
         }
         default:
-            logger.log("Unknown DB env variable, use sqlite or mongo");
+            logger.info("Unknown DB env variable, use sqlite or mongo");
             process.exit(1);
     }
 }
 
 async function start() {
     try {
+        const processConfig = config.get("process");
         const file = path.join(__dirname, "..", "..", `sqlite.log`);
         console.log(file);
         logger.enableWrite(file);
@@ -58,6 +61,10 @@ async function start() {
             prnInfoController,
             prnIndicesController,
         );
+
+        setInterval(() => {
+            processData.logDBSize();
+        }, processConfig.logInterval);
 
         // const client = new WebSocketClient(processData);
 
@@ -76,7 +83,7 @@ async function start() {
         client.subscribe("custom");
         await client.start();
     } catch (err: any) {
-        logger.exception(err);
+        logger.error(err);
     }
 }
 

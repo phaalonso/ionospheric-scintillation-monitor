@@ -2,7 +2,7 @@ const WebSocket = require("ws");
 
 const ws = new WebSocket("ws://127.0.0.1:4312");
 
-ws.on("unexpected-response", (e) => console.log);
+ws.on("unexpected-response", () => console.log);
 
 ws.on("open", () => {
     console.log("Abrindo uma conexão");
@@ -12,7 +12,7 @@ ws.on("open", () => {
 });
 
 ws.on("message", (msg) => {
-    console.log(`Received message: ${msg}`);
+    console.log(`Received message: ${msg.toString()}`);
 });
 
 ws.on("error", (err) => {

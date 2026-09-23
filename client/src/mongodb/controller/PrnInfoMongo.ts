@@ -1,4 +1,8 @@
-import { IPrnInfoController } from "../../controller/IPrnInfoController";
+import {
+    AmountOfSNRPerPRN,
+    FindByRPNResult,
+    IPrnInfoController,
+} from "../../controller";
 import { SignalMetrics } from "../../model/SignalMetrics";
 import logger from "../../logger";
 import { PrnInfoModel } from "../database/prninfo";
@@ -6,7 +10,7 @@ import { PrnInfoModel } from "../database/prninfo";
 export class PrnInfoMongo implements IPrnInfoController {
     public async insert(metric: SignalMetrics) {
         return new PrnInfoModel(metric).save().catch((err) => {
-            logger.exception(err, "On insert prninfo mongo");
+            logger.error(err, "On insert prninfo mongo");
         });
     }
 
@@ -15,10 +19,10 @@ export class PrnInfoMongo implements IPrnInfoController {
     }
 
     /**
-     * @description Retorna dados inseridos em prninfo agrupados em um intervalo de um minuto relativo ao parametro time
+     * @description Retorna dados inseridos em prninfo agrupados num intervalo de um minuto relativo ao parametro time
      * @param time tempo sera relativo a esse parametro
      */
-    public groupByPrn(time: Date) {
+    public groupByPrn(time: Date): Promise<AmountOfSNRPerPRN[]> {
         //console.log('Get gropuped prn');
         return PrnInfoModel.aggregate()
             .match({
@@ -40,11 +44,11 @@ export class PrnInfoMongo implements IPrnInfoController {
     }
 
     /**
-     * @description Seleciona prn e snr de determinado prn em um periodo de um minuto relativo ao parametro time
+     * @description Seleciona prn e snr de determinado prn num periodo de um minuto relativo ao parametro time
      * @param time tempo sera relativo a esse parametro
      * @param prn informa de qual prn será realizado a filtragem
      */
-    public findByPrn(time: Date, prn: number) {
+    public findByPrn(time: Date, prn: number): Promise<FindByRPNResult[]> {
         //return this.dao.all(
         //'SELECT prn, snr FROM prninfo WHERE time BETWEEN ?-60000 AND ? AND prn = ?',
         //[time, time, prn]

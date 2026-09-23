@@ -1,5 +1,5 @@
 import WebSockets from "ws";
-import readline from "readline";
+import readline from "node:readline";
 
 const client = new WebSockets("ws://127.0.0.1:8000");
 const rl = readline.createInterface({

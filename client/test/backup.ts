@@ -1,6 +1,6 @@
 import { BackupService } from "../src/bettersqlite/BackupService";
 import { SQLite } from "../src/bettersqlite/database/DAO";
-import path from "path";
+import path from "node:path";
 import { UploadService } from "../src/bettersqlite/UploadService";
 import { PrnIndicesBetterSqlite } from "../src/bettersqlite/controllers/PrnIndicesBetterSqlite";
 import { PrnInfoBetterSqlite } from "../src/bettersqlite/controllers/PrnInfoBetterSqlite";

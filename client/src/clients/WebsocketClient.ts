@@ -9,14 +9,14 @@ export class WebsocketClient extends Client {
         super();
     }
 
-    protected _sendMessage(message: string) {
+    protected sendMessage(message: string) {
         this.client.send(message);
     }
-    protected _sendSubscribeMessage(channel: string) {
+    protected sendSubscribeMessage(channel: string) {
         this.client.send(`sub_${channel}\n`);
     }
-    protected _connect(cb: (...args: any[]) => void) {
-        logger.log(`Conectando com ${this.websocketUrl}`);
+    protected connect(cb: (...args: any[]) => void) {
+        logger.info(`Conectando com ${this.websocketUrl}`);
         this.client = new WebSocket(this.websocketUrl);
         this.client.on("open", cb);
         this.client.on("message", this.messageCB);
