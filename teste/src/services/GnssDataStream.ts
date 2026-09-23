@@ -1,7 +1,7 @@
-import SerialPort, { parsers } from 'serialport';
-import { GPSConfig } from '../config/gpsConfig';
-import fs, { ReadStream, WriteStream } from 'fs';
-import GPS from 'gps';
+import SerialPort, { parsers } from "serialport";
+import { GPSConfig } from "../config/gpsConfig";
+import fs, { ReadStream, WriteStream } from "fs";
+import GPS from "gps";
 import logger from "../logger";
 
 type Callback = (chunk: any) => void;
@@ -26,7 +26,7 @@ export class DataProvider extends GPS {
 
     public setSerialInput(input: string = GPSConfig.serialInput) {
         if (this.inputStream) {
-            throw new Error('There is already an input stream');
+            throw new Error("There is already an input stream");
         }
 
         logger.log(`Receiving data from serial input: ${input}`);
@@ -35,30 +35,30 @@ export class DataProvider extends GPS {
             baudRate: GPSConfig.baudRate,
         });
 
-        this.inputStream.on('error', (err: Error) => {
-            if (err.message.includes('No such file or directory')) {
+        this.inputStream.on("error", (err: Error) => {
+            if (err.message.includes("No such file or directory")) {
                 logger.log(`Cant find input file ${input}`);
                 process.exit(1);
             }
 
-            logger.exception(err, 'Serial port')
+            logger.exception(err, "Serial port");
         });
     }
 
     public setFileInput(fileInput: string) {
         if (this.inputStream) {
-            throw new Error('There is already an input stream');
+            throw new Error("There is already an input stream");
         }
 
         logger.log(`Receiving data from file input ${fileInput}`);
 
         this.inputStream = fs.createReadStream(fileInput);
 
-        this.inputStream.on('error', err => {
-            logger.exception(err, 'Serial port')
+        this.inputStream.on("error", (err) => {
+            logger.exception(err, "Serial port");
         });
 
-        this.inputStream.on('end', () => {
+        this.inputStream.on("end", () => {
             process.exit(0);
         });
     }
@@ -67,16 +67,16 @@ export class DataProvider extends GPS {
         logger.log(`Piping data to GPS`);
 
         this.parserStream = new parsers.Readline({
-            delimiter: '\r\n',
+            delimiter: "\r\n",
         });
 
-        this.parserStream.on('error', err => {
-            logger.exception(err, 'Parser');
+        this.parserStream.on("error", (err) => {
+            logger.exception(err, "Parser");
         });
 
         this.inputStream.pipe(this.parserStream);
 
-        this.parserStream.on('data', data => {
+        this.parserStream.on("data", (data) => {
             try {
                 this.update(data);
             } catch (err) {
@@ -84,9 +84,9 @@ export class DataProvider extends GPS {
             }
         });
 
-        this.parserStream.on('error', err => {
-            logger.exception(err, 'Parser');
-        })
+        this.parserStream.on("error", (err) => {
+            logger.exception(err, "Parser");
+        });
     }
 
     public pipeToFile(file: string): void {

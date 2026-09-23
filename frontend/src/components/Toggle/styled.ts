@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const Switch = styled.label`
     position: relative;
@@ -29,12 +29,12 @@ export const Slider = styled.span`
     right: 0;
     bottom: 0;
     background-color: white;
-	border-radius: 34px;
-	--webkit-transition: .4s;
-    transition: .5s;
+    border-radius: 34px;
+    --webkit-transition: 0.4s;
+    transition: 0.5s;
     border: 2px solid black;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
-    
+
     &:before {
         position: absolute;
         content: "";
@@ -43,10 +43,10 @@ export const Slider = styled.span`
         top: 3px;
         border-radius: 50%;
         background-color: black;
-        transition: .5s;
+        transition: 0.5s;
         box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
         /*Alguma coisa ta mudando isso, e é necessário setar para 0*/
-        left: 2px; 
+        left: 2px;
     }
 `;
 
@@ -80,12 +80,12 @@ export const Container = styled.div`
 `;
 
 export const GroupInput = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
 
-	label {
-		font-weight: 500;
-	}
+    label {
+        font-weight: 500;
+    }
 `;

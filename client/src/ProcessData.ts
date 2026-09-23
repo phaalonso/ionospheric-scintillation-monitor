@@ -21,11 +21,11 @@ export class ProcessData {
 
     constructor(
         private readonly prnInfoController: IPrnInfoController,
-        private readonly prnIndicesController: IPrnIndicesController
+        private readonly prnIndicesController: IPrnIndicesController,
     ) {
-        const processConfig = config.get('process');
+        const processConfig = config.get("process");
 
-        logger.log('Iniciando ProcessData');
+        logger.log("Iniciando ProcessData");
 
         this.interval = processConfig.interval;
         this.logInterval = processConfig.logInterval;
@@ -34,8 +34,12 @@ export class ProcessData {
         this.counter = 0;
         this.maxCounter = 60000 / this.interval;
 
-        logger.log(`Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`);
-        logger.log(`Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`);
+        logger.log(
+            `Intervalo entre as inserções na base de dados: ${this.interval / 1000} segundos`,
+        );
+        logger.log(
+            `Counter máximo entre as inserções: (60000 / ${this.interval}) = ${this.maxCounter}`,
+        );
 
         this.setupDBSizeLog(this.logInterval);
         this.setupProcess(this.interval);
@@ -47,23 +51,21 @@ export class ProcessData {
     private setupDBSizeLog(interval: number): NodeJS.Timeout {
         const logDbSize = async () => {
             const prninfoLength = await this.prnInfoController.countRows();
-            const prnindicesLength = await this.prnIndicesController.indicesLength();
+            const prnindicesLength =
+                await this.prnIndicesController.indicesLength();
 
             // logger.log(`Quantidade de  dados ${qtd}`);
             logger.log(`Prninfo: ${prninfoLength}`);
             logger.log(`Prnindices: ${prnindicesLength}`);
-        }
+        };
 
-        return setInterval(
-            logDbSize,
-            interval
-        );
+        return setInterval(logDbSize, interval);
     }
 
     private setupProcess(interval: number): NodeJS.Timeout {
         const processInterval = async () => {
             if (this.buffer.length == 0) {
-                logger.log('Buffer vazio');
+                logger.log("Buffer vazio");
                 return;
             }
 
@@ -79,15 +81,12 @@ export class ProcessData {
                 this.counter = 0;
                 this.processMinute();
 
-                const timestamp = this.timeController.getTime()
+                const timestamp = this.timeController.getTime();
                 this.timeController = new Date(timestamp + 60000);
             }
-        }
+        };
 
-        return setInterval(
-            processInterval,
-            interval
-        );
+        return setInterval(processInterval, interval);
     }
 
     /**
@@ -98,7 +97,7 @@ export class ProcessData {
         satellite: Satellite[],
         lat: number,
         lon: number,
-        time: Date
+        time: Date,
     ) {
         if (!this.timeController) {
             this.timeController = time;
@@ -112,7 +111,7 @@ export class ProcessData {
                 elev: satelite.elevation,
                 lat,
                 lon,
-                time
+                time,
             });
         }
 
@@ -124,14 +123,21 @@ export class ProcessData {
     }
 
     public passouUmMinuto(time: Date): boolean {
-        return time.getMinutes() > this.timeController.getMinutes() || time.getHours() > this.timeController.getHours();
+        return (
+            time.getMinutes() > this.timeController.getMinutes() ||
+            time.getHours() > this.timeController.getHours()
+        );
     }
 
     public async processMinute() {
         try {
-            logger.log(`salvando prnindices relacionado a ${this.timeController.toISOString()}!`)
+            logger.log(
+                `salvando prnindices relacionado a ${this.timeController.toISOString()}!`,
+            );
 
-            const rows = await this.prnInfoController.groupByPrn(this.timeController);
+            const rows = await this.prnInfoController.groupByPrn(
+                this.timeController,
+            );
 
             logger.log(`Processing ${rows.length} prns`);
 
@@ -145,7 +151,10 @@ export class ProcessData {
                     let intensidade = 0;
 
                     try {
-                        const prnData = await this.prnInfoController.findByPrn(this.timeController, row.prn);
+                        const prnData = await this.prnInfoController.findByPrn(
+                            this.timeController,
+                            row.prn,
+                        );
                         //logger.log('Prn info by minute', prnData[0]);
 
                         prnData.forEach((row: any) => {
@@ -157,7 +166,7 @@ export class ProcessData {
                                 vIntensidadeSinal.push(intensidade);
                                 intensidadeSinalQuadrado += Math.pow(
                                     intensidade,
-                                    2
+                                    2,
                                 );
                             }
                         });
@@ -171,12 +180,12 @@ export class ProcessData {
                         intensidadeSinalQuadrado /= vIntensidadeSinal.length;
                         let mediaIntensidadeSinalQuadrado = Math.pow(
                             mean(vIntensidadeSinal),
-                            2
+                            2,
                         );
                         let s4 = Math.sqrt(
                             (intensidadeSinalQuadrado -
                                 mediaIntensidadeSinalQuadrado) /
-                            mediaIntensidadeSinalQuadrado
+                                mediaIntensidadeSinalQuadrado,
                         );
 
                         logger.log(`Inserting prnindice`);
@@ -184,7 +193,7 @@ export class ProcessData {
                             dpSnr,
                             s4,
                             this.timeController,
-                            row.prn
+                            row.prn,
                         );
                     } catch (err: any) {
                         console.log(err);

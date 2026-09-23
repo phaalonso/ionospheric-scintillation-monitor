@@ -1,30 +1,30 @@
-import { Worker } from 'worker_threads';
-import { AsyncResource } from 'async_hooks';
-import { EventEmitter } from 'events';
-import path from 'path';
-import logger from '../logger';
-import { CustomData } from '../services/processData';
+import { Worker } from "worker_threads";
+import { AsyncResource } from "async_hooks";
+import { EventEmitter } from "events";
+import path from "path";
+import logger from "../logger";
+import { CustomData } from "../services/processData";
 
-const kTaskInfo = Symbol('kTaskInfo');
-const kWorkerFreedEvent = Symbol('kWorkerFreedEvent');
+const kTaskInfo = Symbol("kTaskInfo");
+const kWorkerFreedEvent = Symbol("kWorkerFreedEvent");
 
 type fn = (...any) => any;
 
 type Task = {
     task: any;
     callback: fn;
-}
+};
 
 export interface IWorkerMessages {
-	data?: CustomData[]
-	time?: Date;
+    data?: CustomData[];
+    time?: Date;
 }
 
 class WorkerPoolTaskInfo extends AsyncResource {
     private callback: fn;
 
     constructor(callback: fn) {
-        super('WorkerPoolTaskInfo');
+        super("WorkerPoolTaskInfo");
 
         this.callback = callback;
     }
@@ -56,7 +56,9 @@ export class WorkerPool extends EventEmitter {
         }
 
         this.on(kWorkerFreedEvent, () => {
-			logger.log(`Freed worker, workers on Pool ${this.freeWorkers.length}`);
+            logger.log(
+                `Freed worker, workers on Pool ${this.freeWorkers.length}`,
+            );
             // No evento de uma worker_thread possuir seu trabalho concluido, e haver mais processos a serem realizados
             // ela irá continuar processando a próxima tarefa
             if (this.tasks.length > 0) {
@@ -67,9 +69,9 @@ export class WorkerPool extends EventEmitter {
     }
 
     public addNewWorker() {
-        const worker = new Worker(path.resolve(__dirname, './task.js'));
+        const worker = new Worker(path.resolve(__dirname, "./task.js"));
 
-        worker.on('message', result => {            
+        worker.on("message", (result) => {
             // Em caso de sucesso, chama a callback que foi passada para `runTask`
             // remove `TaskInfo` associado com o Worker e o demarca como free novamente
             worker[kTaskInfo].done(null, result);
@@ -78,13 +80,12 @@ export class WorkerPool extends EventEmitter {
             this.emit(kWorkerFreedEvent);
         });
 
-        worker.on('error', err => {
+        worker.on("error", (err) => {
             console.log(worker[kTaskInfo]);
-            if (worker[kTaskInfo])
-                worker[kTaskInfo].done(err, null);
+            if (worker[kTaskInfo]) worker[kTaskInfo].done(err, null);
 
             logger.exception(err);
-            logger.log('Error on worker, creating a new one!');
+            logger.log("Error on worker, creating a new one!");
             this.workers.splice(this.workers.indexOf(worker), 1);
             this.addNewWorker();
         });
@@ -96,7 +97,9 @@ export class WorkerPool extends EventEmitter {
 
     public runTask(task: any, callback: fn) {
         if (this.freeWorkers.length === 0) {
-			logger.log(`Not engouth workers, putting task in queue! Queue: ${this.tasks.length}`);
+            logger.log(
+                `Not engouth workers, putting task in queue! Queue: ${this.tasks.length}`,
+            );
             this.tasks.push({ task: task, callback });
             return;
         }
@@ -104,7 +107,9 @@ export class WorkerPool extends EventEmitter {
         const worker = this.freeWorkers.pop();
         worker[kTaskInfo] = new WorkerPoolTaskInfo(callback);
         worker.postMessage(task);
-        logger.log(`Worker grabing a new task! Remaining workers: ${this.freeWorkers.length}`);
+        logger.log(
+            `Worker grabing a new task! Remaining workers: ${this.freeWorkers.length}`,
+        );
     }
 
     public close() {

@@ -7,7 +7,7 @@ export const Main = styled.div`
     height: 100%;
 
     form {
-		width: 350px;
+        width: 350px;
         display: flex;
         flex-direction: column;
 

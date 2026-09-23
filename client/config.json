@@ -1,10 +1,10 @@
 {
-	"client": {
-		"host": "localhost",
-		"port": 2108
-	},
-	"process": {
-		"interval": 15000,
-		"logInterval": 1800000
-	}
+    "client": {
+        "host": "localhost",
+        "port": 2108
+    },
+    "process": {
+        "interval": 15000,
+        "logInterval": 1800000
+    }
 }

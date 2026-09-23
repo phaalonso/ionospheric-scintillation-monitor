@@ -5,14 +5,14 @@ export const Container = styled.div`
     width: 100wv;
     padding: 30px;
 
-	display: flex;
-	justify-content: center;
+    display: flex;
+    justify-content: center;
 
-	form {
-		width: 300px;
+    form {
+        width: 300px;
 
         button {
-			width: 100%;
+            width: 100%;
             cursor: pointer;
             font-weight: bold;
 
@@ -22,10 +22,10 @@ export const Container = styled.div`
         }
 
         button:hover {
-			background-color: lightblue;
+            background-color: lightblue;
             border-color: blue;
             border-radius: 0px;
             transition: 300ms;
         }
-	}
+    }
 `;

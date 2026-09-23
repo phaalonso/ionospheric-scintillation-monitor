@@ -1,2 +1,2 @@
-require('ts-node').register();
-require('./task_process.ts');
+require("ts-node").register();
+require("./task_process.ts");

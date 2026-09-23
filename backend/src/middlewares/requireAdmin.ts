@@ -1,13 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import UserService from "../services/UserService";
 
-export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+export async function requireAdmin(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
     try {
         if (req.user && req.user.id) {
             const user = await UserService.findById(req.user.id);
 
-            if (user && user.administrator)
-                return next();
+            if (user && user.administrator) return next();
         }
 
         return res.sendStatus(403);

@@ -5,7 +5,7 @@ export function trackPromises(promise) {
 
     return promise.finally(() => {
         --count;
-    })
+    });
 }
 
 // setInterval(() => {

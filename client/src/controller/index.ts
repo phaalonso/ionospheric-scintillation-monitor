@@ -1,2 +1,2 @@
-export * from './IPrnIndicesController';
-export * from './IPrnInfoController';
+export * from "./IPrnIndicesController";
+export * from "./IPrnInfoController";

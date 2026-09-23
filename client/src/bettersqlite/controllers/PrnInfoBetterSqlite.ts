@@ -4,13 +4,11 @@ import logger from "../../logger";
 import { SignalMetrics } from "../../model/SignalMetrics";
 
 export class PrnInfoBetterSqlite implements IPrnInfoController {
-	constructor(
-		private dao: SQLite,
-	) { }
+    constructor(private dao: SQLite) {}
 
-	async createTable() {
-		logger.log('Criando prninfo');
-		const sql = `
+    async createTable() {
+        logger.log("Criando prninfo");
+        const sql = `
 			CREATE TABLE IF NOT EXISTS prninfo (
 				id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 				time TEXT NOT NULL,
@@ -23,69 +21,76 @@ export class PrnInfoBetterSqlite implements IPrnInfoController {
 			)
 		`;
 
-		return this.dao.run(sql);
-	}
-	
-	/**
-	 * @description constrói parte da mensagem de inserção, para cada valor recebido 
-	 * @param data - Métricas do sinal
-	 * @returns values com o formato necessário para inserção
-	 */
-	mapData(data: SignalMetrics[]) {
-		return data.map(cd => (`(${cd.prn},${cd.snr},${cd.azi},${cd.elev},${cd.lat},${cd.lon},datetime('${cd.time.toISOString()}'))`)).join(',');
-	}
+        return this.dao.run(sql);
+    }
 
-	insert(metric: SignalMetrics) {
-		const placeholder = this.mapData([metric]);
-		return this.dao.run(
-			'INSERT INTO prninfo (prn, snr, azi, elev, lat, long, time) VALUES ' + placeholder,
-		);
-	}
+    /**
+     * @description constrói parte da mensagem de inserção, para cada valor recebido
+     * @param data - Métricas do sinal
+     * @returns values com o formato necessário para inserção
+     */
+    mapData(data: SignalMetrics[]) {
+        return data
+            .map(
+                (cd) =>
+                    `(${cd.prn},${cd.snr},${cd.azi},${cd.elev},${cd.lat},${cd.lon},datetime('${cd.time.toISOString()}'))`,
+            )
+            .join(",");
+    }
 
-	insertMany(data: SignalMetrics[]) {
-		const placeholder = this.mapData(data);
-		return this.dao.run(
-			'INSERT INTO prninfo (prn, snr, azi, elev, lat, long, time) VALUES ' + placeholder,
-		);
-	}
+    insert(metric: SignalMetrics) {
+        const placeholder = this.mapData([metric]);
+        return this.dao.run(
+            "INSERT INTO prninfo (prn, snr, azi, elev, lat, long, time) VALUES " +
+                placeholder,
+        );
+    }
 
-	/**
-	 * @description Retorna dados inseridos em prninfo agrupados em um intervalo de um minuto relativo ao parametro time
-	 * @param time tempo sera relativo a esse parametro
-	 */
-	public groupByPrn(time: Date): Promise<any> {
-		return this.dao.all(
-			"select prn, count(snr) as total from prninfo where time between datetime(?, '-1 minute') and datetime(?) group by prn",
-			[time.toISOString(), time.toISOString()]
-		);
-	}
+    insertMany(data: SignalMetrics[]) {
+        const placeholder = this.mapData(data);
+        return this.dao.run(
+            "INSERT INTO prninfo (prn, snr, azi, elev, lat, long, time) VALUES " +
+                placeholder,
+        );
+    }
 
-	/**
-	 * @description Seleciona prn e snr de determinado prn em um periodo de um minuto relativo ao parametro time
-	 * @param time tempo sera relativo a esse parametro
-	 * @param prn informa de qual prn será realizado a filtragem
-	 */
-	public findByPrn(time: Date, prn: number): Promise<any> {
-		return this.dao.all(
-			"SELECT prn, snr FROM prninfo WHERE time BETWEEN datetime(?, '-1 minute') AND datetime(?) AND prn = ?",
-			[time.toISOString(), time.toISOString(), prn]
-		);
-	}
+    /**
+     * @description Retorna dados inseridos em prninfo agrupados em um intervalo de um minuto relativo ao parametro time
+     * @param time tempo sera relativo a esse parametro
+     */
+    public groupByPrn(time: Date): Promise<any> {
+        return this.dao.all(
+            "select prn, count(snr) as total from prninfo where time between datetime(?, '-1 minute') and datetime(?) group by prn",
+            [time.toISOString(), time.toISOString()],
+        );
+    }
 
-	async countRows(): Promise<number> {
-		const sql = "SELECT COUNT(*) as total FROM prninfo";
+    /**
+     * @description Seleciona prn e snr de determinado prn em um periodo de um minuto relativo ao parametro time
+     * @param time tempo sera relativo a esse parametro
+     * @param prn informa de qual prn será realizado a filtragem
+     */
+    public findByPrn(time: Date, prn: number): Promise<any> {
+        return this.dao.all(
+            "SELECT prn, snr FROM prninfo WHERE time BETWEEN datetime(?, '-1 minute') AND datetime(?) AND prn = ?",
+            [time.toISOString(), time.toISOString(), prn],
+        );
+    }
 
-		const res: any = await this.dao.get(sql);
+    async countRows(): Promise<number> {
+        const sql = "SELECT COUNT(*) as total FROM prninfo";
 
-		return res.total;
-	}
+        const res: any = await this.dao.get(sql);
+
+        return res.total;
+    }
 
     async deleteBefore(lastDateTime: Date): Promise<void> {
-		const sql = "DELETE FROM prninfo WHERE time <= ?";
-		const stmt = this.dao.con.prepare(sql);
+        const sql = "DELETE FROM prninfo WHERE time <= ?";
+        const stmt = this.dao.con.prepare(sql);
 
-		const res = stmt.run(lastDateTime.toISOString());
+        const res = stmt.run(lastDateTime.toISOString());
 
-		logger.log(`Removed ${res.changes} rows from PrnInfo`);
+        logger.log(`Removed ${res.changes} rows from PrnInfo`);
     }
 }

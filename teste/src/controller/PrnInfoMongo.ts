@@ -11,7 +11,7 @@ export class PrnInfoMongo extends PrnInfoController {
         elevation: number,
         lat: number,
         lon: number,
-        time: Date
+        time: Date,
     ) {
         return new PrnInfoModel({
             prn,
@@ -21,10 +21,11 @@ export class PrnInfoMongo extends PrnInfoController {
             lat,
             long: lon,
             time,
-        }).save()
-        .catch(err => {
-            logger.exception(err, 'On insert prninfo mongo');
-        });
+        })
+            .save()
+            .catch((err) => {
+                logger.exception(err, "On insert prninfo mongo");
+            });
     }
 
     insertMany(data: CustomData[]) {
@@ -79,7 +80,7 @@ export class PrnInfoMongo extends PrnInfoController {
         return new Promise((res, rej) => {
             PrnInfoModel.countDocuments()
                 .then((count) => res(count))
-                .catch(err => rej(err));
+                .catch((err) => rej(err));
         });
     }
 }

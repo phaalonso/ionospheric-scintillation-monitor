@@ -1,4 +1,5 @@
-Heap-20210617T004130.heapsnapshot
+*.heapsnapshot
+node_modules/
 .vscode/*
 **/*.log
 **/*.db

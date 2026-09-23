@@ -8,10 +8,10 @@ export abstract class PrnInfoController {
         elevation: number,
         lat: number,
         lon: number,
-        time: Date
+        time: Date,
     );
 
-	abstract insertMany(data: CustomData[]);
+    abstract insertMany(data: CustomData[]);
 
     /**
      * @description Retorna dados inseridos em prninfo agrupados em um intervalo de um minuto relativo ao parametro time

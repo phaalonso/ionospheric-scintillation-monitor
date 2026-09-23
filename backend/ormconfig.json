@@ -1,25 +1,19 @@
 {
-   "name": "default",
-   "type": "postgres",
-   "host": "localhost",
-   "database": "gnss",
-   "port": 5432,
-   "username": "postgres",
-   "password": "ifsp",
-   "synchronize": false,
-   "logging": false,
-   "entities": [
-      "src/model/**/*.ts"
-   ],
-   "migrations": [
-      "src/database/migration/**/*.ts"
-   ],
-   "subscribers": [
-      "src/database/subscriber/**/*.ts"
-   ],
-   "cli": {
-      "entitiesDir": "src/model",
-      "migrationsDir": "src/database/migration",
-      "subscribersDir": "src/database/subscriber"
-   }
+    "name": "default",
+    "type": "postgres",
+    "host": "localhost",
+    "database": "gnss",
+    "port": 5432,
+    "username": "postgres",
+    "password": "ifsp",
+    "synchronize": false,
+    "logging": false,
+    "entities": ["src/model/**/*.ts"],
+    "migrations": ["src/database/migration/**/*.ts"],
+    "subscribers": ["src/database/subscriber/**/*.ts"],
+    "cli": {
+        "entitiesDir": "src/model",
+        "migrationsDir": "src/database/migration",
+        "subscribersDir": "src/database/subscriber"
+    }
 }

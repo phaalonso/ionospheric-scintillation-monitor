@@ -1,5 +1,5 @@
-import path from 'path';
+import path from "path";
 
 export const DBCONFIG = {
-	sqlitePath: path.resolve(path.dirname("."), "dados.db")
-}
+    sqlitePath: path.resolve(path.dirname("."), "dados.db"),
+};

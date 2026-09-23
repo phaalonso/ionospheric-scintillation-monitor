@@ -5,9 +5,9 @@ export function trackPromises(promise: Promise<any>) {
 
     return promise.finally(() => {
         --count;
-    })
+    });
 }
 
 //setInterval(() => {
-	//console.log(`Promises: ${count}`);
+//console.log(`Promises: ${count}`);
 //}, 1000 * 60);

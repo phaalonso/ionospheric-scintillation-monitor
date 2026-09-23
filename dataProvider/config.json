@@ -1,13 +1,13 @@
 {
-	"gps": {
-		"serialInput": "/dev/ttyUSB0",
-		"baudRate": 115200
-	},
-	"socket": {
-		"host": "localhost",
-		"port": 2108
-	},
-	"log": {
-		"qtdEnvioInterval": 1800000
-	}
+    "gps": {
+        "serialInput": "/dev/ttyUSB0",
+        "baudRate": 115200
+    },
+    "socket": {
+        "host": "localhost",
+        "port": 2108
+    },
+    "log": {
+        "qtdEnvioInterval": 1800000
+    }
 }

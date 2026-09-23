@@ -4,13 +4,18 @@ import { Container, Slider, Switch, GroupInput } from "./styled";
 import { useField } from "@unform/core";
 
 interface ToggleProps {
-	name: string;
-	label?: string;
+    name: string;
+    label?: string;
 }
 
 type InputProps = ToggleProps & JSX.IntrinsicElements["input"];
 
-const Toggle: React.FC<InputProps> = ({ name, label, checked = false, ...rest }) => {
+const Toggle: React.FC<InputProps> = ({
+    name,
+    label,
+    checked = false,
+    ...rest
+}) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const { fieldName, registerField } = useField(name);
 
@@ -30,26 +35,26 @@ const Toggle: React.FC<InputProps> = ({ name, label, checked = false, ...rest })
         });
     }, [fieldName, registerField]);
 
-	return (
-		<GroupInput>
-			{ label && <label htmlFor={fieldName}>{ label }</label> }
-			<Container>
-				<Switch>
-					<input 
-						ref={inputRef}
-						defaultChecked={checked} 
-						type="checkbox" 
-						{...rest} 
-					/>
-					<Slider />
-				</Switch>
-			</Container>
-		</GroupInput>
-	);
+    return (
+        <GroupInput>
+            {label && <label htmlFor={fieldName}>{label}</label>}
+            <Container>
+                <Switch>
+                    <input
+                        ref={inputRef}
+                        defaultChecked={checked}
+                        type="checkbox"
+                        {...rest}
+                    />
+                    <Slider />
+                </Switch>
+            </Container>
+        </GroupInput>
+    );
 };
 
 Toggle.propTypes = {
-	checked: PropTypes.bool,
+    checked: PropTypes.bool,
 };
 
 export default Toggle;

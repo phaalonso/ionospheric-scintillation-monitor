@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const Container = styled.div`
     display: flex;
@@ -28,7 +28,8 @@ export const Table = styled.table`
         text-align: left;
     }
 
-    th, td {
+    th,
+    td {
         padding: 12px 15px;
     }
 
@@ -67,7 +68,7 @@ export const ActionButtons = styled.div`
         padding: 5px;
 
         svg {
-            stroke-width:  2px;
+            stroke-width: 2px;
         }
 
         &:first-child {
@@ -76,18 +77,22 @@ export const ActionButtons = styled.div`
 
             &:hover {
                 color: #f08909;
-                box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+                box-shadow:
+                    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+                    rgba(0, 0, 0, 0.23) 0px 3px 6px;
                 transition: 200ms;
             }
         }
 
         &:last-child {
-            background-color: #FF7F7F;
+            background-color: #ff7f7f;
 
             &:hover {
                 background-color: #900000;
                 color: white;
-                box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+                box-shadow:
+                    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+                    rgba(0, 0, 0, 0.23) 0px 3px 6px;
                 transition: 200ms;
             }
         }
@@ -109,11 +114,13 @@ export const NewUserBtn = styled.button`
 
     svg {
         margin-right: 5px;
-        stroke-width:  4px;
+        stroke-width: 4px;
     }
 
     &:hover {
-        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+        box-shadow:
+            rgba(0, 0, 0, 0.16) 0px 3px 6px,
+            rgba(0, 0, 0, 0.23) 0px 3px 6px;
         transition: 200ms;
     }
 `;

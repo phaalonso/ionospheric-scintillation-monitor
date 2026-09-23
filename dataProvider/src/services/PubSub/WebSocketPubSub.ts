@@ -1,79 +1,88 @@
 import { CustomSocket, PubSub } from "./PubSub";
-import osu from 'node-os-utils';
-import WebSocket from 'ws';
+import osu from "node-os-utils";
+import WebSocket from "ws";
 import logger from "../../logger";
 
 const { cpu, mem } = osu;
 
 export class WebsocketPubSub extends PubSub<CustomSocket<WebSocket>> {
-	private wsS: WebSocket.Server;
+    private wsS: WebSocket.Server;
 
-	constructor() {
-		super('send');
-		this.createChannel('cpu');
-		this.createChannel('ram');
+    constructor() {
+        super("send");
+        this.createChannel("cpu");
+        this.createChannel("ram");
 
-		this.wsS = new WebSocket.Server({
-			port: 4312
-		});
+        this.wsS = new WebSocket.Server({
+            port: 4312,
+        });
 
-		this.handleNewConnection();
-		this.errorHandler();
+        this.handleNewConnection();
+        this.errorHandler();
 
-		this.listening();
-	}
+        this.listening();
+    }
 
-	protected sendMessage(socket: CustomSocket<WebSocket>, message: string) {
-		socket.send(message);
-	}
+    protected sendMessage(socket: CustomSocket<WebSocket>, message: string) {
+        socket.send(message);
+    }
 
-	private handleNewConnection() {
-		this.wsS.on('connection', (socket: CustomSocket<WebSocket>) => {
-			console.log(`Nova conexão criada`);
-			socket.channels = []; // Canais aos quais o socket está conecatdo
+    private handleNewConnection() {
+        this.wsS.on("connection", (socket: CustomSocket<WebSocket>) => {
+            console.log(`Nova conexão criada`);
+            socket.channels = []; // Canais aos quais o socket está conecatdo
 
-			socket.on('message', data => {
-				this.handleMessage(socket, data);
-			});
+            socket.on("message", (data) => {
+                this.handleMessage(socket, data);
+            });
 
-			socket.on('close', () => {
-				this.disconnectSocket(socket);
-			});
-		});
-	}
+            socket.on("close", () => {
+                this.disconnectSocket(socket);
+            });
+        });
+    }
 
-	private errorHandler() {
-		this.wsS.on('error', (err) => {
-			if (err.name === 'EADDRINUSE') {
-				logger.log('Endereço já está em uso, tentando novamente...');
-				this.wsS.close()
-			} else {
-				logger.log(err);
-			}
-		});
-	}
-	
-	private listening() {
-		this.wsS.on('listening', () => {
-			logger.log(`Servidor iniciado em`, this.wsS.address());
+    private errorHandler() {
+        this.wsS.on("error", (err) => {
+            if (err.name === "EADDRINUSE") {
+                logger.log("Endereço já está em uso, tentando novamente...");
+                this.wsS.close();
+            } else {
+                logger.log(err);
+            }
+        });
+    }
 
-			setInterval((server: WebsocketPubSub) => {
-				if (server.listeningChannels.get('cpu') && server.listeningChannels.get('cpu')!.size > 0) {
-					cpu.usage().then(cpu => {
-						logger.log(cpu);
-						server.pub('cpu', `cpu_${cpu}`);
-					});
-				}
+    private listening() {
+        this.wsS.on("listening", () => {
+            logger.log(`Servidor iniciado em`, this.wsS.address());
 
-				if (server.listeningChannels.get('ram') && server.listeningChannels.get('ram')!.size > 0) {
-					//logger.log(mem.totalMem());
-					mem.used().then(ram => {
-						logger.log(ram.usedMemMb);
-						server.pub('ram', `ram_${ram.usedMemMb}`);
-					});
-				}
+            setInterval(
+                (server: WebsocketPubSub) => {
+                    if (
+                        server.listeningChannels.get("cpu") &&
+                        server.listeningChannels.get("cpu")!.size > 0
+                    ) {
+                        cpu.usage().then((cpu) => {
+                            logger.log(cpu);
+                            server.pub("cpu", `cpu_${cpu}`);
+                        });
+                    }
 
-			}, 1000, this);
-		});
-	}
+                    if (
+                        server.listeningChannels.get("ram") &&
+                        server.listeningChannels.get("ram")!.size > 0
+                    ) {
+                        //logger.log(mem.totalMem());
+                        mem.used().then((ram) => {
+                            logger.log(ram.usedMemMb);
+                            server.pub("ram", `ram_${ram.usedMemMb}`);
+                        });
+                    }
+                },
+                1000,
+                this,
+            );
+        });
+    }
 }

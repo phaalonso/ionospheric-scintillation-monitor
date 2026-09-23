@@ -5,9 +5,7 @@ import { Client } from "./IClient";
 export class WebsocketClient extends Client {
     private client!: WebSocket;
 
-    constructor(
-        private readonly websocketUrl: string,
-    ) {
+    constructor(private readonly websocketUrl: string) {
         super();
     }
 
@@ -18,12 +16,11 @@ export class WebsocketClient extends Client {
         this.client.send(`sub_${channel}\n`);
     }
     protected _connect(cb: (...args: any[]) => void) {
-		logger.log(`Conectando com ${this.websocketUrl}`);
+        logger.log(`Conectando com ${this.websocketUrl}`);
         this.client = new WebSocket(this.websocketUrl);
-        this.client.on('open', cb);
-        this.client.on('message', this.messageCB);
-        this.client.on('error', this.errorCB);
-        this.client.on('close', this.endCB);
+        this.client.on("open", cb);
+        this.client.on("message", this.messageCB);
+        this.client.on("error", this.errorCB);
+        this.client.on("close", this.endCB);
     }
-
 }

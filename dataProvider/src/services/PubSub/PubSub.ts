@@ -1,13 +1,14 @@
 import logger from "../../logger";
 
-export type CustomSocket<T> = T & { channels?: string[] }
+export type CustomSocket<T> = T & { channels?: string[] };
 
 export abstract class PubSub<T> {
-    protected readonly listeningChannels = new Map<string, Set<CustomSocket<T>>>();
+    protected readonly listeningChannels = new Map<
+        string,
+        Set<CustomSocket<T>>
+    >();
 
-	protected constructor(
-		protected _methodName = 'write',
-	) { }
+    protected constructor(protected _methodName = "write") {}
 
     protected abstract sendMessage(socket: T, message: string): void;
 
@@ -25,11 +26,10 @@ export abstract class PubSub<T> {
      * @param channelName
      * @param socket
      */
-	public sub(channelName: string, socket: CustomSocket<T>) {
+    public sub(channelName: string, socket: CustomSocket<T>) {
         const channel = this.listeningChannels.get(channelName);
 
-        if (!channel || channel.has(socket))
-            return;
+        if (!channel || channel.has(socket)) return;
 
         channel.add(socket);
         logger.log(`Subscribe in ${channelName}`);
@@ -64,24 +64,24 @@ export abstract class PubSub<T> {
             return;
         }
 
-		//process.stdout.write(`Sending ${message} on channel ${channelName}\n`);
+        //process.stdout.write(`Sending ${message} on channel ${channelName}\n`);
 
-        channel.forEach(con => {
+        channel.forEach((con) => {
             this.sendMessage(con, message);
         });
     }
 
     public echo(message: string) {
-        this.listeningChannels.forEach(channel => {
-            channel.forEach(con => {
+        this.listeningChannels.forEach((channel) => {
+            channel.forEach((con) => {
                 // @ts-ignore
                 this.sendMessage(con, message);
-            })
-        })
+            });
+        });
     }
 
     public handleMessage(socket: CustomSocket<T>, data: any) {
-        const msgArray = data.toString().split('\n');
+        const msgArray = data.toString().split("\n");
 
         for (const msg of msgArray) {
             logger.log(`Received message: ${msg}`);
@@ -91,18 +91,18 @@ export abstract class PubSub<T> {
             if (matchSub?.[1]) {
                 const channel = matchSub[1];
                 this.sub(channel, socket);
-				this.sendMessage(socket, `rec_${msg}`);
+                this.sendMessage(socket, `rec_${msg}`);
                 return;
             }
 
-            const matchPub = (/^pub_(.*)_(.*)$/).exec(msg);
+            const matchPub = /^pub_(.*)_(.*)$/.exec(msg);
 
             if (matchPub?.[1] && matchPub[2]) {
                 const channel = matchPub[1];
                 const message = matchPub[2];
 
                 this.pub(channel, message);
-				this.sendMessage(socket, `rec_${msg}`);
+                this.sendMessage(socket, `rec_${msg}`);
                 return;
             }
 
